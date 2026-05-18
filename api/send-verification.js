@@ -104,7 +104,7 @@ async function sendVerificationEmail(toEmail, verifyUrl) {
   });
 
   const htmlBody = `
-    <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#0b0f14;color:#fff;border-radius:10px;padding:32px;border:1px solid #1e2530;">
+    <div style="font-family:Tahoma,Arial,sans-serif;max-width:520px;margin:0 auto;background:#0b0f14;color:#fff;border-radius:10px;padding:32px;border:1px solid #1e2530;">
       <div style="text-align:center;margin-bottom:24px;">
         <h1 style="color:#2D8CFF;letter-spacing:3px;font-size:22px;margin:0;">HYMENOPTERA</h1>
       </div>
