@@ -2530,9 +2530,9 @@
       // Clean the URL immediately so a refresh doesn't re-trigger this
       history.replaceState(null, '', window.location.pathname);
       if (isUpgradeSuccess) {
-        // Show a temporary processing indicator while the webhook may still be arriving
         var planDisplayEl = document.getElementById('plan-display');
-        if (planDisplayEl) planDisplayEl.textContent = 'Plan: Processing upgrade…';
+        if (planDisplayEl) planDisplayEl.textContent = 'Plan: Verifying upgrade\u2026';
+        setStatus('Payment verification complete — activating upgrade\u2026');
       }
       // Poll up to 5 times (every 2 s) until the server returns the upgraded plan
       var pollCount = 0;
@@ -2582,36 +2582,60 @@
     });
   }
 
-  // Stripe payment links
-  var stripeLinks = {
-    basic: "https://buy.stripe.com/dRm3co30K4Nra70b8ld7q00",
-    premium: "https://buy.stripe.com/aFa6oA6cWcfT2Ey7W9d7q01",
-    ultimate: "https://buy.stripe.com/4gM00catc7ZDengccpd7q02"
-  };
-
+  // Server-side Stripe Checkout (no hardcoded payment links — keys stay server-side)
   function openStripeCheckout(plan) {
-    var url = stripeLinks[plan];
-    if (!url) {
-      console.error("Stripe link not configured for plan:", plan);
+    var email = localStorage.getItem('hymenoptera_user');
+    var msgEl = document.getElementById('upgrade-message');
+
+    if (!email || email === 'guest') {
+      if (msgEl) { msgEl.textContent = 'Please sign in to upgrade your plan.'; msgEl.className = 'upgrade-message error'; }
       return;
     }
-    window.open(url, "_blank", "noopener,noreferrer");
+
+    // Show secure connection status
+    if (msgEl) { msgEl.textContent = 'Establishing secure connection\u2026'; msgEl.className = 'upgrade-message'; }
+
+    // Disable all plan buttons during request
+    ['upgrade-basic', 'upgrade-premium', 'upgrade-ultimate'].forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (btn) btn.disabled = true;
+    });
+
+    fetch('/api/create-checkout', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: email, plan: plan })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.url) {
+        if (msgEl) { msgEl.textContent = 'Redirecting to secure Stripe checkout\u2026'; msgEl.className = 'upgrade-message'; }
+        window.location.href = data.url;
+      } else {
+        if (msgEl) { msgEl.textContent = data.error || 'Could not start checkout. Please try again.'; msgEl.className = 'upgrade-message error'; }
+        ['upgrade-basic', 'upgrade-premium', 'upgrade-ultimate'].forEach(function (id) {
+          var btn = document.getElementById(id);
+          if (btn) btn.disabled = false;
+        });
+      }
+    })
+    .catch(function () {
+      if (msgEl) { msgEl.textContent = 'Network error. Please check your connection and try again.'; msgEl.className = 'upgrade-message error'; }
+      ['upgrade-basic', 'upgrade-premium', 'upgrade-ultimate'].forEach(function (id) {
+        var btn = document.getElementById(id);
+        if (btn) btn.disabled = false;
+      });
+    });
   }
 
   var upgradeBasic = document.getElementById('upgrade-basic');
-  if (upgradeBasic) {
-    upgradeBasic.addEventListener('click', function () { openStripeCheckout('basic'); });
-  }
+  if (upgradeBasic) upgradeBasic.addEventListener('click', function () { openStripeCheckout('basic'); });
 
   var upgradePremium = document.getElementById('upgrade-premium');
-  if (upgradePremium) {
-    upgradePremium.addEventListener('click', function () { openStripeCheckout('premium'); });
-  }
+  if (upgradePremium) upgradePremium.addEventListener('click', function () { openStripeCheckout('premium'); });
 
   var upgradeUltimate = document.getElementById('upgrade-ultimate');
-  if (upgradeUltimate) {
-    upgradeUltimate.addEventListener('click', function () { openStripeCheckout('ultimate'); });
-  }
+  if (upgradeUltimate) upgradeUltimate.addEventListener('click', function () { openStripeCheckout('ultimate'); });
 
   updatePlanDisplay();
 })();

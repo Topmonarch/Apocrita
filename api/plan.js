@@ -1,15 +1,13 @@
-// api/plan.js — Server-side plan status endpoint
+// api/plan.js — Read-only plan status endpoint
+//
+// Reads from the Supabase subscriptions table (server-authoritative),
+// with Redis as a fast-path cache. Never trusts any client-side claim.
 //
 // GET  /api/plan?email=user@example.com
-//   Returns the stored plan record for the user, or starter defaults if none found.
-//   Response: { plan, billingStatus, messageLimit, imageLimit, videoLimit }
-//
 // POST /api/plan { email }
-//   Same as GET but via POST body. Useful for clients that prefer POST.
 //
-// This endpoint is intentionally read-only. Plan writes are performed exclusively
-// by the Stripe webhook handler (api/stripe-webhook.js) to keep the billing source
-// of truth server-authoritative.
+// Response: { plan, billingStatus, customerId, currentPeriodEnd,
+//             messageLimit, imageLimit, videoLimit }
 
 'use strict';
 
@@ -20,72 +18,121 @@ try {
   console.warn('api/plan: Redis unavailable:', e.message);
 }
 
+const PLAN_LIMITS = {
+  starter:  { messageLimit: 30,   imageLimit: 10,   videoLimit: 10   },
+  basic:    { messageLimit: 150,  imageLimit: 50,   videoLimit: 20   },
+  premium:  { messageLimit: 500,  imageLimit: 75,   videoLimit: 30   },
+  ultimate: { messageLimit: null, imageLimit: null, videoLimit: null  }
+};
+const VALID_PLANS     = Object.keys(PLAN_LIMITS);
+const CACHE_TTL       = 300;
 const PLAN_KEY_PREFIX = 'user_plan:';
 
-const PLAN_LIMITS = {
-  starter: { messageLimit: 30,   imageLimit: 10,   videoLimit: 10   },
-  basic:   { messageLimit: 150,  imageLimit: 50,   videoLimit: 20   },
-  premium: { messageLimit: 500,  imageLimit: 75,   videoLimit: 30   },
-  ultimate:{ messageLimit: null, imageLimit: null, videoLimit: null  }
-};
-
-const VALID_PLANS = Object.keys(PLAN_LIMITS);
-
 function planKey(email) {
-  return `${PLAN_KEY_PREFIX}${email.toLowerCase().trim()}`;
+  return PLAN_KEY_PREFIX + email.toLowerCase().trim();
 }
 
-async function getPlanRecord(email) {
-  if (!_redis) return null;
-  const raw = await _redis.command('GET', planKey(email));
-  if (!raw) return null;
+async function getSubscriptionFromSupabase(email) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
   try {
-    return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    const r = await fetch(
+      url + '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email) +
+      '&select=plan,billing_status,stripe_customer_id,current_period_end&limit=1',
+      {
+        headers: {
+          'Content-Type':  'application/json',
+          'apikey':        key,
+          'Authorization': 'Bearer ' + key,
+          'Prefer':        'return=representation'
+        }
+      }
+    );
+    if (!r.ok) return null;
+    const rows = await r.json();
+    return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
   } catch (e) {
+    console.warn('api/plan: Supabase fetch failed:', e.message);
     return null;
   }
 }
 
+async function getFromRedisCache(email) {
+  if (!_redis) return null;
+  try {
+    const raw = await _redis.command('GET', planKey(email));
+    if (!raw) return null;
+    return typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch (e) { return null; }
+}
+
+async function writeToRedisCache(email, record) {
+  if (!_redis) return;
+  try {
+    await _redis.command('SET', planKey(email), JSON.stringify(record), 'EX', String(CACHE_TTL));
+  } catch (e) { /* non-fatal */ }
+}
+
+function buildResponse(plan, billingStatus, customerId, currentPeriodEnd) {
+  const safePlan = VALID_PLANS.includes(plan) ? plan : 'starter';
+  const limits   = PLAN_LIMITS[safePlan];
+  return {
+    plan:             safePlan,
+    billingStatus:    billingStatus    || 'inactive',
+    customerId:       customerId       || null,
+    currentPeriodEnd: currentPeriodEnd || null,
+    messageLimit:     limits.messageLimit,
+    imageLimit:       limits.imageLimit,
+    videoLimit:       limits.videoLimit
+  };
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
-    res.setHeader('Content-Type', 'application/json');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const params = req.method === 'GET' ? (req.query || {}) : (req.body || {});
   const { email } = params;
 
-  if (!email || typeof email !== 'string' || !email.includes('@')) {
-    res.setHeader('Content-Type', 'application/json');
-    // Return starter defaults when no valid email is provided
-    return res.status(200).json(buildResponse('starter', 'inactive', null));
+  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(200).json(buildResponse('starter', 'inactive', null, null));
   }
+
+  const normalizedEmail = email.trim().toLowerCase();
 
   try {
-    const record = await getPlanRecord(email);
-    const plan = (record && VALID_PLANS.includes(record.plan)) ? record.plan : 'starter';
-    const billingStatus = (record && record.billingStatus) ? record.billingStatus : 'inactive';
-    const customerId = (record && record.customerId) ? record.customerId : null;
+    // 1. Supabase — authoritative source of truth
+    const row = await getSubscriptionFromSupabase(normalizedEmail);
+    if (row) {
+      await writeToRedisCache(normalizedEmail, {
+        plan:            row.plan,
+        billingStatus:   row.billing_status,
+        customerId:      row.stripe_customer_id,
+        currentPeriodEnd: row.current_period_end
+      });
+      console.log('api/plan: [supabase]', normalizedEmail, '->', row.plan, row.billing_status);
+      return res.status(200).json(
+        buildResponse(row.plan, row.billing_status, row.stripe_customer_id, row.current_period_end)
+      );
+    }
 
-    console.log(`api/plan: email=${email} plan=${plan} status=${billingStatus}`);
+    // 2. Redis cache fallback
+    const cached = await getFromRedisCache(normalizedEmail);
+    if (cached) {
+      console.log('api/plan: [redis]', normalizedEmail, '->', cached.plan);
+      return res.status(200).json(
+        buildResponse(cached.plan, cached.billingStatus, cached.customerId, cached.currentPeriodEnd || null)
+      );
+    }
 
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(200).json(buildResponse(plan, billingStatus, customerId));
+    // 3. Default starter plan
+    console.log('api/plan: [default]', normalizedEmail, '-> starter');
+    return res.status(200).json(buildResponse('starter', 'inactive', null, null));
+
   } catch (err) {
-    console.warn('api/plan: failed to retrieve plan:', err.message);
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(200).json(buildResponse('starter', 'inactive', null));
+    console.warn('api/plan: error:', err.message);
+    return res.status(200).json(buildResponse('starter', 'inactive', null, null));
   }
 };
-
-function buildResponse(plan, billingStatus, customerId) {
-  const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
-  return {
-    plan,
-    billingStatus,
-    customerId,
-    messageLimit: limits.messageLimit,
-    imageLimit:   limits.imageLimit,
-    videoLimit:   limits.videoLimit
-  };
-}

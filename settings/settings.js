@@ -209,21 +209,85 @@ function deleteAccount() {
 // ===== BILLING =====
 
 var planLimitsDisplay = {
-  starter: '30 messages / day',
-  basic: '150 messages / day',
-  premium: '500 messages / day',
+  starter:  '30 messages / day',
+  basic:    '150 messages / day',
+  premium:  '500 messages / day',
   ultimate: 'Unlimited messages'
 };
 
+var planStatusLabels = {
+  active:    'Active',
+  trialing:  'Trial Active',
+  inactive:  'Free Plan',
+  cancelled: 'Cancelled',
+  past_due:  'Payment Required'
+};
+
 function loadBillingData() {
-  var plan = localStorage.getItem('hymenoptera_plan') || 'starter';
-  var planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+  var user = localStorage.getItem('hymenoptera_user');
+  // Always re-fetch from server so plan reflects server state, not localStorage
+  if (user && user !== 'guest') {
+    _fetchAndDisplayPlan(user);
+  } else {
+    _applyPlanToUI('starter', 'inactive', null, null);
+  }
+}
 
-  var planNameEl = document.getElementById('billing-plan-name');
-  var planLimitEl = document.getElementById('billing-plan-limit');
+function _fetchAndDisplayPlan(email) {
+  fetch('/api/plan?email=' + encodeURIComponent(email))
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (data) {
+      if (!data) return;
+      // Update localStorage so the rest of the app (usage limits etc.) stays in sync
+      localStorage.setItem('hymenoptera_plan', data.plan || 'starter');
+      if (data.customerId) {
+        localStorage.setItem('hymenoptera_stripe_customer_' + email, data.customerId);
+      }
+      _applyPlanToUI(data.plan, data.billingStatus, data.customerId, data.currentPeriodEnd);
+    })
+    .catch(function () {
+      var cached = localStorage.getItem('hymenoptera_plan') || 'starter';
+      _applyPlanToUI(cached, 'inactive', null, null);
+    });
+}
 
-  if (planNameEl) planNameEl.textContent = planName;
-  if (planLimitEl) planLimitEl.textContent = planLimitsDisplay[plan] || '30 messages / day';
+function _applyPlanToUI(plan, billingStatus, customerId, currentPeriodEnd) {
+  var safePlan  = plan || 'starter';
+  var planName  = safePlan.charAt(0).toUpperCase() + safePlan.slice(1);
+  var statusLabel = planStatusLabels[billingStatus] || billingStatus || 'Free Plan';
+
+  var nameEl    = document.getElementById('billing-plan-name');
+  var limitEl   = document.getElementById('billing-plan-limit');
+  var statusEl  = document.getElementById('billing-status-label');
+  var renewEl   = document.getElementById('billing-renew-date');
+  var portalBtn = document.getElementById('billing-portal-btn');
+
+  if (nameEl)   nameEl.textContent   = planName;
+  if (limitEl)  limitEl.textContent  = planLimitsDisplay[safePlan] || '30 messages / day';
+  if (statusEl) statusEl.textContent = statusLabel;
+
+  if (renewEl) {
+    if (currentPeriodEnd) {
+      var d = new Date(currentPeriodEnd);
+      renewEl.textContent = 'Renews: ' + d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      renewEl.style.display = '';
+    } else {
+      renewEl.style.display = 'none';
+    }
+  }
+
+  // Show portal button only when user has a paid Stripe customer record
+  if (portalBtn) {
+    portalBtn.style.display = (customerId && safePlan !== 'starter') ? '' : 'none';
+  }
+
+  // Show a security badge in the billing panel
+  var badgeEl = document.getElementById('billing-secure-badge');
+  if (badgeEl) {
+    badgeEl.textContent = (safePlan !== 'starter' && billingStatus === 'active')
+      ? 'Subscription Active — Secured by Stripe'
+      : 'Payments secured by Stripe';
+  }
 }
 
 function openBillingPortal() {
@@ -233,26 +297,23 @@ function openBillingPortal() {
     return;
   }
 
-  var customerId = localStorage.getItem('hymenoptera_stripe_customer_' + user);
-  if (!customerId) {
-    showSettingsMessage('billing-message', 'No billing account found. Please upgrade to a paid plan first.', 'error');
-    return;
-  }
+  showSettingsMessage('billing-message', 'Connecting to billing portal...', 'success');
 
+  // Send email to server — it validates the customer ID from Supabase, not client
   fetch('/api/billing-portal', {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customerId: customerId })
+    body:    JSON.stringify({ email: user })
   })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
+  .then(function (r) { return r.json(); })
+  .then(function (data) {
     if (data.url) {
       window.location.href = data.url;
     } else {
-      showSettingsMessage('billing-message', 'Could not open billing portal. Please try again.', 'error');
+      showSettingsMessage('billing-message', data.error || 'Could not open billing portal. Please try again.', 'error');
     }
   })
-  .catch(function() {
+  .catch(function () {
     showSettingsMessage('billing-message', 'Could not connect to billing portal. Please try again.', 'error');
   });
 }
@@ -515,26 +576,23 @@ function checkVerificationState() {
 
 // ===== INIT =====
 
-// Fetch the server-side plan for the given user email and update localStorage
-// and the billing panel if the plan has changed.
+// Fetch the authoritative plan from the server and sync localStorage + UI.
+// This is the canonical way to refresh plan state — never trust client claims.
 function refreshPlanFromServer(email) {
   if (!email || email === 'guest') return;
   fetch('/api/plan?email=' + encodeURIComponent(email))
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (data) {
       if (!data || !data.plan) return;
-      var serverPlan = data.plan;
-      var localPlan  = localStorage.getItem('hymenoptera_plan') || 'starter';
-      if (serverPlan !== localPlan) {
-        console.log('settings: applying server plan', serverPlan, '(was', localPlan + ')');
-        localStorage.setItem('hymenoptera_plan', serverPlan);
-      }
-      // Persist customerId for billing-portal access
+      localStorage.setItem('hymenoptera_plan', data.plan);
       if (data.customerId) {
         localStorage.setItem('hymenoptera_stripe_customer_' + email, data.customerId);
       }
-      // Refresh the billing panel to show the latest plan
-      loadBillingData();
+      _applyPlanToUI(data.plan, data.billingStatus, data.customerId, data.currentPeriodEnd || null);
+      // Propagate to chat.js if it's loaded
+      if (typeof userPlan !== 'undefined') {
+        try { window._hymenoptera_plan = data.plan; } catch (e) { /* ignore */ }
+      }
     })
     .catch(function () {
       // Non-fatal: keep existing local plan

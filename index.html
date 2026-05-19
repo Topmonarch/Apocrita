@@ -1223,6 +1223,291 @@
       }
     }
 
+    /* ===== BILLING PANEL ADDITIONS ===== */
+    .billing-plan-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .billing-lock-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      opacity: 0.75;
+      flex-shrink: 0;
+    }
+
+    .billing-secure-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 10px;
+      background: rgba(45,140,255,0.1);
+      border: 1px solid rgba(45,140,255,0.3);
+      border-radius: 4px;
+      font-size: 11px;
+      color: #2D8CFF;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .billing-upgrade-prompt {
+      margin-top: 16px;
+    }
+
+    .billing-upgrade-open-btn {
+      background: linear-gradient(180deg, #2D8CFF 0%, #1a6fd8 100%) !important;
+      border: none !important;
+    }
+
+    /* ===== XP UPGRADE MODAL ===== */
+    .upgrade-xp-window {
+      width: 580px;
+      max-width: 96vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #ece9d8;
+      border: 2px solid #0a246a;
+      border-radius: 8px 8px 4px 4px;
+      box-shadow:
+        0 12px 48px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.55);
+      position: relative;
+    }
+
+    .upgrade-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px 4px 8px;
+      background: linear-gradient(180deg,
+        #2a6dd9 0%, #1e4fa8 40%, #1a45a0 60%, #2060c8 100%);
+      border-bottom: 1px solid #0a246a;
+      user-select: none;
+    }
+
+    .upgrade-titlebar-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .upgrade-titlebar-title {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .upgrade-close-btn {
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      background: linear-gradient(180deg, #e86060 0%, #c00000 100%);
+      border: 1px solid #6b0000;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    .upgrade-close-btn:hover {
+      background: linear-gradient(180deg, #ff8080 0%, #e00000 100%);
+    }
+
+    .upgrade-trust-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: linear-gradient(180deg, #d0f0d0 0%, #b8e8b8 100%);
+      border-bottom: 1px solid #70b870;
+      font-size: 12px;
+      color: #1a5a1a;
+      font-weight: 700;
+    }
+
+    .upgrade-trust-icon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .upgrade-trust-text { flex: 1; }
+
+    .upgrade-body {
+      padding: 16px 18px 12px;
+    }
+
+    .upgrade-subtitle {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    .upgrade-plans {
+      display: flex;
+      gap: 10px;
+    }
+
+    .upgrade-plan-card {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #b8b5ae;
+      border-radius: 4px;
+      padding: 12px 10px;
+      position: relative;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        0 2px 4px rgba(0,0,0,0.12);
+    }
+
+    .upgrade-plan-card-featured {
+      border-color: #2D8CFF;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        0 2px 8px rgba(45,140,255,0.25);
+    }
+
+    .upgrade-plan-badge {
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2D8CFF;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+
+    .upgrade-plan-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0a246a;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .upgrade-plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 12px;
+    }
+
+    .upgrade-plan-features li {
+      font-size: 11px;
+      color: #444;
+      padding: 3px 0;
+      border-bottom: 1px solid #ece9d8;
+      line-height: 1.4;
+    }
+
+    .upgrade-plan-features li:last-child { border-bottom: none; }
+
+    .upgrade-plan-features li::before {
+      content: '\2713\a0';
+      color: #1a7a1a;
+      font-weight: 700;
+    }
+
+    .upgrade-plan-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 7px 4px;
+      background: linear-gradient(180deg, #f5f4f0 0%, #d4d0c8 100%);
+      border: 1px solid #7a7773;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #1a1a1a;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.8),
+        0 2px 3px rgba(0,0,0,0.18);
+    }
+
+    .upgrade-plan-btn:hover {
+      background: linear-gradient(180deg, #4a8fde 0%, #1e5fb4 100%);
+      border-color: #0a3a80;
+      color: #fff;
+    }
+
+    .upgrade-plan-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .upgrade-plan-btn-featured {
+      background: linear-gradient(180deg, #2D8CFF 0%, #1a6fd8 100%);
+      border-color: #0a3a80;
+      color: #fff;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.25),
+        0 2px 6px rgba(45,140,255,0.4);
+    }
+
+    .upgrade-plan-btn-featured:hover {
+      background: linear-gradient(180deg, #4aa0ff 0%, #2a80e8 100%);
+    }
+
+    .upgrade-btn-icon {
+      width: 12px;
+      height: 12px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .upgrade-message {
+      min-height: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a5a1a;
+      text-align: center;
+      padding: 6px 0 2px;
+    }
+
+    .upgrade-message.error { color: #8b0000; }
+
+    .upgrade-cancel-btn {
+      display: block;
+      width: 100%;
+      padding: 7px;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px solid #b8b5ae;
+      border-radius: 3px;
+      color: #666;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .upgrade-cancel-btn:hover { border-color: #7a7773; color: #333; }
+
+    @media (max-width: 540px) {
+      .upgrade-plans { flex-direction: column; }
+      .upgrade-xp-window { max-height: 80vh; }
+    }
+
     /* ===== EMAIL VERIFICATION SCREENS ===== */
     #verification-screen,
     #verification-expired-screen {
@@ -2031,17 +2316,36 @@
           <div id="settings-billing" class="settings-panel">
             <div class="settings-section-title">Billing</div>
 
+            <!-- Plan status card -->
             <div class="billing-plan-card">
-              <div class="billing-plan-name" id="billing-plan-name">Starter</div>
-              <div class="billing-plan-detail">Current Plan</div>
-              <hr class="settings-divider" style="margin:12px 0;" />
-              <div class="billing-plan-detail">Message Limit: <span id="billing-plan-limit">30 messages / day</span></div>
+              <div class="billing-plan-header">
+                <div>
+                  <div class="billing-plan-name" id="billing-plan-name">Starter</div>
+                  <div class="billing-plan-detail">Current Plan &mdash; <span id="billing-status-label">Free Plan</span></div>
+                </div>
+                <img src="public/icons/Security - Ok.png" class="billing-lock-icon" alt="" title="Payments secured by Stripe" />
+              </div>
+              <hr class="settings-divider" style="margin:10px 0;" />
+              <div class="billing-plan-detail">Messages: <span id="billing-plan-limit">30 / day</span></div>
+              <div class="billing-plan-detail" id="billing-renew-date" style="display:none;"></div>
+              <div class="billing-secure-badge" id="billing-secure-badge">Payments secured by Stripe</div>
             </div>
 
-            <p style="font-size:13px;color:#888;margin:0 0 16px;">
-              Use the Billing Portal to manage your subscription, update payment methods, view invoices, or cancel your plan.
-            </p>
-            <button class="settings-btn" onclick="openBillingPortal()">Manage Billing</button>
+            <!-- Upgrade prompt for free users -->
+            <div class="billing-upgrade-prompt" id="billing-upgrade-prompt">
+              <p style="margin:0 0 10px;font-size:13px;color:#aaa;">
+                Upgrade to unlock more messages, image creation, video creation, and Hive Mode.
+              </p>
+              <button class="settings-btn billing-upgrade-open-btn" onclick="document.getElementById('upgrade-modal').classList.remove('hidden')">
+                Upgrade Plan
+              </button>
+            </div>
+
+            <!-- Manage billing (paid users only) -->
+            <button class="settings-btn" id="billing-portal-btn" onclick="openBillingPortal()" style="display:none;margin-top:10px;">
+              Manage Subscription
+            </button>
+
             <div id="billing-message" class="settings-message"></div>
           </div>
 
@@ -2051,15 +2355,76 @@
 
   </div>
 
-  <!-- Upgrade Modal -->
+  <!-- Upgrade Modal — XP-themed secure checkout panel -->
   <div id="upgrade-modal" class="command-palette hidden">
     <div class="command-palette-backdrop" onclick="document.getElementById('upgrade-modal').classList.add('hidden')"></div>
-    <div class="command-palette-panel" style="padding:24px;">
-      <h3 style="margin:0 0 16px;color:#fff;font-size:15px;letter-spacing:1px;">Choose a Plan</h3>
-      <button id="upgrade-basic" class="sidebar-btn" style="margin-bottom:8px;">⚡ Upgrade to Basic</button>
-      <button id="upgrade-premium" class="sidebar-btn" style="margin-bottom:8px;">🚀 Upgrade to Premium</button>
-      <button id="upgrade-ultimate" class="sidebar-btn" style="margin-bottom:16px;">👑 Upgrade to Ultimate</button>
-      <button class="sidebar-btn" onclick="document.getElementById('upgrade-modal').classList.add('hidden')" style="color:#888;">Cancel</button>
+    <div class="upgrade-xp-window">
+      <!-- XP Luna titlebar -->
+      <div class="upgrade-titlebar">
+        <img src="public/icons/Security - Ok.png" class="upgrade-titlebar-icon" alt="" />
+        <span class="upgrade-titlebar-title">Hymenoptera &mdash; Upgrade Plan</span>
+        <button class="upgrade-close-btn" onclick="document.getElementById('upgrade-modal').classList.add('hidden')" title="Close">&#x2715;</button>
+      </div>
+      <!-- Trust bar -->
+      <div class="upgrade-trust-bar">
+        <img src="public/icons/Lock.png" class="upgrade-trust-icon" alt="" />
+        <span class="upgrade-trust-text">Secure connection &mdash; all payments processed by Stripe</span>
+      </div>
+      <!-- Plan cards -->
+      <div class="upgrade-body">
+        <p class="upgrade-subtitle">Choose a plan to unlock more features. You will be taken to Stripe's secure checkout.</p>
+        <div class="upgrade-plans">
+          <!-- Basic -->
+          <div class="upgrade-plan-card">
+            <div class="upgrade-plan-name">Basic</div>
+            <ul class="upgrade-plan-features">
+              <li>150 messages / day</li>
+              <li>50 image generations / day</li>
+              <li>20 video creations / day</li>
+              <li>10 file uploads / day</li>
+            </ul>
+            <button class="upgrade-plan-btn" id="upgrade-basic">
+              <img src="public/icons/Play.png" class="upgrade-btn-icon" alt="" />
+              Upgrade to Basic
+            </button>
+          </div>
+          <!-- Premium -->
+          <div class="upgrade-plan-card upgrade-plan-card-featured">
+            <div class="upgrade-plan-badge">Most Popular</div>
+            <div class="upgrade-plan-name">Premium</div>
+            <ul class="upgrade-plan-features">
+              <li>500 messages / day</li>
+              <li>75 image generations / day</li>
+              <li>30 video creations / day</li>
+              <li>50 file uploads / day</li>
+              <li>Hive Mode access</li>
+            </ul>
+            <button class="upgrade-plan-btn upgrade-plan-btn-featured" id="upgrade-premium">
+              <img src="public/icons/Play.png" class="upgrade-btn-icon" alt="" />
+              Upgrade to Premium
+            </button>
+          </div>
+          <!-- Ultimate -->
+          <div class="upgrade-plan-card">
+            <div class="upgrade-plan-name">Ultimate</div>
+            <ul class="upgrade-plan-features">
+              <li>Unlimited messages</li>
+              <li>Unlimited images</li>
+              <li>Unlimited video creations</li>
+              <li>Unlimited file uploads</li>
+              <li>All features + priority</li>
+            </ul>
+            <button class="upgrade-plan-btn" id="upgrade-ultimate">
+              <img src="public/icons/Play.png" class="upgrade-btn-icon" alt="" />
+              Upgrade to Ultimate
+            </button>
+          </div>
+        </div>
+        <div id="upgrade-message" class="upgrade-message"></div>
+        <button class="upgrade-cancel-btn" onclick="document.getElementById('upgrade-modal').classList.add('hidden')">
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 
