@@ -929,10 +929,10 @@
     }
 
     .send-icon {
-      width: 16px;
-      height: 16px;
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
-      image-rendering: pixelated;
+      object-fit: contain;
     }
 
     .send-label {
@@ -1105,8 +1105,8 @@
       }
 
       .send-icon {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
       }
 
       #message-input {
@@ -1288,7 +1288,7 @@
           <button id="voice-btn" class="send-btn" title="Voice input">🎤</button>
           <!-- send button text is white, glow remains blue -->
           <button class="send-btn glow" onclick="sendMessage()" title="Send">
-            <img src="/icons/OE Send.png" class="send-icon" alt="" aria-hidden="true" />
+            <img src="public/icons/OE Send.png" class="send-icon" alt="" aria-hidden="true" />
             <span class="send-label">Send</span>
           </button>
         </div>
