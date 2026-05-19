@@ -1217,6 +1217,218 @@
         height: 48px;
       }
     }
+
+    /* ===== LIVE TALK MODAL ===== */
+    .lt-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9990;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lt-overlay[hidden] { display: none; }
+
+    .lt-window {
+      width: 420px;
+      max-width: 96vw;
+      background: #ece9d8;
+      border: 2px solid #0a246a;
+      border-radius: 8px 8px 4px 4px;
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+      font-family: Tahoma, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Luna blue titlebar */
+    .lt-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px 4px 8px;
+      background: linear-gradient(180deg,
+        #2a6dd9 0%, #1e4fa8 40%, #1a45a0 60%, #2060c8 100%);
+      border-bottom: 1px solid #0a246a;
+      user-select: none;
+    }
+
+    .lt-titlebar-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .lt-titlebar-title {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lt-close-btn {
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      background: linear-gradient(180deg, #e86060 0%, #c00000 100%);
+      border: 1px solid #6b0000;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+    }
+
+    .lt-close-btn:hover {
+      background: linear-gradient(180deg, #ff7070 0%, #e00000 100%);
+    }
+
+    /* Status bar */
+    .lt-status-bar {
+      padding: 4px 10px;
+      background: linear-gradient(180deg, #d4d0c8 0%, #c0bdb4 100%);
+      border-bottom: 1px solid #a0a0a0;
+      font-size: 11px;
+      color: #333;
+      min-height: 22px;
+      display: flex;
+      align-items: center;
+    }
+
+    #lt-status-text {
+      font-weight: 600;
+    }
+
+    /* Waveform canvas frame — recessed LCD look */
+    .lt-waveform-frame {
+      margin: 10px 10px 6px;
+      background: #0a0a0a;
+      border: 2px solid #555;
+      border-radius: 3px;
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.7),
+        0 1px 0 rgba(255,255,255,0.4);
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    #lt-waveform {
+      display: block;
+      width: 100%;
+      height: 64px;
+    }
+
+    /* Transport controls */
+    .lt-controls {
+      display: flex;
+      gap: 8px;
+      padding: 8px 10px 6px;
+      justify-content: center;
+    }
+
+    .lt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 14px;
+      background: linear-gradient(180deg, #f5f4f0 0%, #d8d5cc 50%, #ccc9be 100%);
+      border: 1px solid #7a7773;
+      border-radius: 3px;
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a1a1a;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.8),
+        0 2px 4px rgba(0,0,0,0.25);
+      transition: background 0.1s;
+    }
+
+    .lt-btn:hover {
+      background: linear-gradient(180deg, #fafafa 0%, #e8e5dc 50%, #ddd9ce 100%);
+    }
+
+    .lt-btn:active {
+      background: linear-gradient(180deg, #ccc9be 0%, #d8d5cc 100%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .lt-btn.active {
+      background: linear-gradient(180deg, #4a8fde 0%, #1e5fb4 100%);
+      border-color: #0a3a80;
+      color: #fff;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 0 8px rgba(45,140,255,0.5);
+    }
+
+    .lt-btn-end {
+      margin-left: 8px;
+    }
+
+    .lt-btn-icon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    /* Transcript log */
+    .lt-transcript {
+      margin: 4px 10px 10px;
+      padding: 6px 8px;
+      height: 130px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #a0a0a0;
+      border-radius: 3px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
+      font-size: 12px;
+      color: #222;
+      line-height: 1.5;
+      scrollbar-width: thin;
+    }
+
+    .lt-transcript::-webkit-scrollbar { width: 8px; }
+    .lt-transcript::-webkit-scrollbar-track { background: #e8e5dc; }
+    .lt-transcript::-webkit-scrollbar-thumb { background: #a0a0a0; border-radius: 4px; }
+
+    .lt-line-user {
+      color: #0a3a80;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .lt-line-ai {
+      color: #1a5a1a;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    /* Waveform state variations — controlled via data-state on the canvas parent */
+    .lt-waveform-frame[data-state="user"]  { border-color: #2a7fd4; box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 0 8px rgba(42,127,212,0.5); }
+    .lt-waveform-frame[data-state="ai"]    { border-color: #28a028; box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 0 8px rgba(40,160,40,0.5); }
+
+    @media (max-width: 480px) {
+      .lt-window { width: 98vw; }
+      #lt-waveform { height: 50px; }
+      .lt-transcript { height: 100px; }
+    }
   </style>
 </head>
 <body>
@@ -1387,7 +1599,11 @@
               </button>
               <button class="xp-menu-item" id="menu-voice-btn" title="Speech to Text">
                 <img src="public/icons/Speech.png" class="xp-menu-icon" alt="" />
-                <span>Speech-to-Text</span>
+                <span>Speech to Text</span>
+              </button>
+              <button class="xp-menu-item" id="menu-livetalk-btn" title="Live Talk — real-time voice conversation">
+                <img src="public/icons/Task Manager.png" class="xp-menu-icon" alt="" />
+                <span>Live Talk</span>
               </button>
               <button class="xp-menu-item" id="menu-attach-btn" title="Attach file">
                 <img src="public/icons/OE Attatch.png" class="xp-menu-icon" alt="" />
@@ -1674,7 +1890,43 @@
       }
     });
   </script>
-  
+
+  <!-- ===== LIVE TALK MODAL ===== -->
+  <div id="livetalk-overlay" class="lt-overlay" hidden>
+    <div id="livetalk-window" class="lt-window">
+      <!-- XP Luna titlebar -->
+      <div class="lt-titlebar">
+        <img src="public/icons/Task Manager.png" class="lt-titlebar-icon" alt="" />
+        <span class="lt-titlebar-title">Hymenoptera Live Talk</span>
+        <button class="lt-close-btn" id="lt-close-btn" title="Close">&#x2715;</button>
+      </div>
+      <!-- Status bar -->
+      <div class="lt-status-bar">
+        <span id="lt-status-text">Ready</span>
+      </div>
+      <!-- Waveform display — XP Sound Recorder style -->
+      <div class="lt-waveform-frame">
+        <canvas id="lt-waveform" width="380" height="64"></canvas>
+      </div>
+      <!-- Transport controls row -->
+      <div class="lt-controls">
+        <button class="lt-btn" id="lt-talk-btn" title="Hold to speak / click to toggle">
+          <img src="public/icons/Record.png" class="lt-btn-icon" alt="" />
+          <span>Talk</span>
+        </button>
+        <button class="lt-btn" id="lt-stop-btn" title="Stop Hymenoptera speaking">
+          <img src="public/icons/Stop.png" class="lt-btn-icon" alt="" />
+          <span>Stop</span>
+        </button>
+        <button class="lt-btn lt-btn-end" id="lt-end-btn" title="End conversation">
+          <img src="public/icons/Exit.png" class="lt-btn-icon" alt="" />
+          <span>End</span>
+        </button>
+      </div>
+      <!-- Transcript log — scrollable -->
+      <div class="lt-transcript" id="lt-transcript"></div>
+    </div>
+  </div>
 
 </body>
 </html>

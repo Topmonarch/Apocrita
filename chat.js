@@ -2023,7 +2023,7 @@
       btn.innerHTML = iconImg + '<span class="voice-listening-label">Listening...</span>';
       btn.classList.add('listening');
     } else {
-      btn.innerHTML = iconImg + '<span>Speech-to-Text</span>';
+      btn.innerHTML = iconImg + '<span>Speech to Text</span>';
       btn.classList.remove('listening');
     }
   }
@@ -2055,6 +2055,333 @@
       }
     });
   }
+
+  // ===== LIVE TALK ENGINE =====
+  (function () {
+    var overlay       = document.getElementById('livetalk-overlay');
+    var waveCanvas    = document.getElementById('lt-waveform');
+    var waveFrame     = waveCanvas ? waveCanvas.parentElement : null;
+    var statusText    = document.getElementById('lt-status-text');
+    var talkBtn       = document.getElementById('lt-talk-btn');
+    var stopBtn       = document.getElementById('lt-stop-btn');
+    var endBtn        = document.getElementById('lt-end-btn');
+    var transcript    = document.getElementById('lt-transcript');
+    var closeBtn      = document.getElementById('lt-close-btn');
+    var menuLiveTalkBtn = document.getElementById('menu-livetalk-btn');
+
+    if (!overlay || !waveCanvas) return;
+
+    var ltCtx = waveCanvas.getContext('2d');
+
+    // --- State ---
+    var ltOpen        = false;
+    var ltState       = 'idle';   // 'idle' | 'user' | 'ai'
+    var ltRecog       = null;
+    var ltSynth       = window.speechSynthesis || null;
+    var ltUtterance   = null;
+    var ltAnimFrame   = null;
+    var ltAudioCtx    = null;
+    var ltAnalyser    = null;
+    var ltMicStream   = null;
+    var ltHistory     = [];       // [{role, content}] for the AI
+
+    // Waveform animation phase (for idle idle line)
+    var ltWavePhase   = 0;
+    // Simulated amplitude for AI speech (no analyser, use random+envelope)
+    var ltAiAmp       = 0;
+    var ltAiAmpTarget = 0;
+    var ltAiAmpTimer  = 0;
+
+    // --- Waveform draw ---
+    function drawWaveform() {
+      var W = waveCanvas.width;
+      var H = waveCanvas.height;
+      ltCtx.fillStyle = '#0a0a0a';
+      ltCtx.fillRect(0, 0, W, H);
+
+      ltCtx.lineWidth = 1.5;
+      ltCtx.beginPath();
+
+      if (ltState === 'user' && ltAnalyser) {
+        // Real microphone frequency data
+        var bufLen = ltAnalyser.frequencyBinCount;
+        var dataArr = new Uint8Array(bufLen);
+        ltAnalyser.getByteTimeDomainData(dataArr);
+        ltCtx.strokeStyle = '#3a9fef';
+        for (var i = 0; i < bufLen; i++) {
+          var x = (i / bufLen) * W;
+          var v = (dataArr[i] / 128.0) - 1.0;
+          var y = H / 2 + v * (H / 2 - 4);
+          if (i === 0) ltCtx.moveTo(x, y);
+          else ltCtx.lineTo(x, y);
+        }
+      } else if (ltState === 'ai') {
+        // Simulated speech envelope for AI responses — green
+        ltAiAmpTimer--;
+        if (ltAiAmpTimer <= 0) {
+          ltAiAmpTarget = 0.15 + Math.random() * 0.55;
+          ltAiAmpTimer  = 4 + Math.floor(Math.random() * 6);
+        }
+        ltAiAmp += (ltAiAmpTarget - ltAiAmp) * 0.18;
+        ltCtx.strokeStyle = '#28c828';
+        var pts = 120;
+        for (var i = 0; i < pts; i++) {
+          var x = (i / (pts - 1)) * W;
+          var freq1 = 2.5, freq2 = 7.3;
+          var y = H / 2
+            + Math.sin(i * freq1 * 0.08 + ltWavePhase * 2.1) * ltAiAmp * (H / 2 - 5)
+            + Math.sin(i * freq2 * 0.08 + ltWavePhase * 3.7) * ltAiAmp * 0.35 * (H / 2 - 5);
+          if (i === 0) ltCtx.moveTo(x, y);
+          else ltCtx.lineTo(x, y);
+        }
+        ltWavePhase += 0.07;
+      } else {
+        // Idle — thin dim green flat line with micro noise
+        ltCtx.strokeStyle = '#1a5a1a';
+        var pts = 80;
+        for (var i = 0; i < pts; i++) {
+          var x = (i / (pts - 1)) * W;
+          var noise = (Math.random() - 0.5) * 2;
+          var y = H / 2 + noise;
+          if (i === 0) ltCtx.moveTo(x, y);
+          else ltCtx.lineTo(x, y);
+        }
+      }
+      ltCtx.stroke();
+      ltAnimFrame = requestAnimationFrame(drawWaveform);
+    }
+
+    function setState(s) {
+      ltState = s;
+      if (waveFrame) waveFrame.setAttribute('data-state', s === 'idle' ? '' : s);
+      if (talkBtn) talkBtn.classList.toggle('active', s === 'user');
+      if (stopBtn) stopBtn.disabled = s !== 'ai';
+      if (statusText) {
+        statusText.textContent =
+          s === 'user' ? 'Listening...' :
+          s === 'ai'   ? 'Hymenoptera is speaking...' :
+                         'Ready — click Talk to speak';
+      }
+    }
+
+    function addLine(role, text) {
+      if (!transcript) return;
+      var div = document.createElement('div');
+      div.className = role === 'user' ? 'lt-line-user' : 'lt-line-ai';
+      div.textContent = (role === 'user' ? 'You: ' : 'Hymenoptera: ') + text;
+      transcript.appendChild(div);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+
+    // --- Mic setup via Web Audio for real waveform ---
+    async function setupMic() {
+      try {
+        if (!ltAudioCtx) {
+          ltAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (ltAudioCtx.state === 'suspended') await ltAudioCtx.resume();
+        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        ltMicStream = stream;
+        var source = ltAudioCtx.createMediaStreamSource(stream);
+        ltAnalyser = ltAudioCtx.createAnalyser();
+        ltAnalyser.fftSize = 256;
+        source.connect(ltAnalyser);
+      } catch (e) {
+        // No mic permission — waveform will stay idle, voice capture still works
+      }
+    }
+
+    function stopMic() {
+      if (ltMicStream) {
+        ltMicStream.getTracks().forEach(function (t) { t.stop(); });
+        ltMicStream = null;
+      }
+      ltAnalyser = null;
+    }
+
+    // --- Speech recognition ---
+    var LTRecogClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function startListening() {
+      if (!LTRecogClass) {
+        addLine('ai', '(Speech recognition is not supported in this browser.)');
+        return;
+      }
+      ltRecog = new LTRecogClass();
+      ltRecog.lang = navigator.language || 'en-US';
+      ltRecog.continuous = false;
+      ltRecog.interimResults = false;
+
+      ltRecog.onresult = function (e) {
+        var text = e.results[0][0].transcript.trim();
+        if (!text) return;
+        addLine('user', text);
+        ltHistory.push({ role: 'user', content: text });
+        setState('idle');
+        askAI(text);
+      };
+
+      ltRecog.onerror = function () {
+        setState('idle');
+      };
+
+      ltRecog.onend = function () {
+        if (ltState === 'user') setState('idle');
+      };
+
+      setState('user');
+      ltRecog.start();
+    }
+
+    function stopListening() {
+      if (ltRecog) { try { ltRecog.stop(); } catch (e) {} ltRecog = null; }
+      setState('idle');
+    }
+
+    // --- AI request (non-streaming for voice — we speak after we have full text) ---
+    async function askAI(userText) {
+      if (statusText) statusText.textContent = 'Thinking...';
+
+      // Build messages array for /api/chat — last 10 turns to stay concise
+      var msgs = ltHistory.slice(-10);
+
+      try {
+        var resp = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: msgs,
+            agent: (typeof currentAgent !== 'undefined' ? currentAgent : 'general'),
+            systemPrompt: (typeof agents !== 'undefined' && agents[currentAgent]
+              ? agents[currentAgent].systemPrompt
+              : 'You are a helpful assistant. Keep answers concise for voice conversation.'),
+            model: (typeof currentModel !== 'undefined' ? currentModel : 'fast'),
+            hiveMode: false,
+            fileContext: '',
+            images: []
+          })
+        });
+
+        if (!resp.ok) {
+          addLine('ai', 'Sorry, I could not reach the server.');
+          setState('idle');
+          return;
+        }
+
+        // Consume the SSE stream and collect full text
+        var reader = resp.body.getReader();
+        var dec    = new TextDecoder();
+        var buf    = '';
+        var full   = '';
+
+        while (true) {
+          var chunk = await reader.read();
+          if (chunk.done) break;
+          buf += dec.decode(chunk.value, { stream: true });
+          var lines = buf.split('\n');
+          buf = lines.pop();
+          for (var i = 0; i < lines.length; i++) {
+            var ln = lines[i].trim();
+            if (!ln || ln === 'data: [DONE]') continue;
+            if (ln.startsWith('data: ')) {
+              try {
+                var p = JSON.parse(ln.slice(6));
+                var d = p.choices && p.choices[0] && p.choices[0].delta && p.choices[0].delta.content;
+                if (d) full += d;
+              } catch (ex) {}
+            }
+          }
+        }
+
+        if (!full) full = 'I did not get a response. Please try again.';
+        ltHistory.push({ role: 'assistant', content: full });
+        addLine('ai', full);
+        speakAI(full);
+
+      } catch (err) {
+        addLine('ai', 'Error: ' + (err.message || 'unknown'));
+        setState('idle');
+      }
+    }
+
+    // --- TTS via Web Speech Synthesis ---
+    function speakAI(text) {
+      if (!ltSynth) {
+        setState('idle');
+        return;
+      }
+      ltSynth.cancel();
+      ltUtterance = new SpeechSynthesisUtterance(text);
+      ltUtterance.lang = navigator.language || 'en-US';
+      ltUtterance.rate = 1.0;
+      ltUtterance.pitch = 1.0;
+
+      ltUtterance.onstart = function () { setState('ai'); };
+      ltUtterance.onend   = function () { setState('idle'); };
+      ltUtterance.onerror = function () { setState('idle'); };
+
+      setState('ai');
+      ltSynth.speak(ltUtterance);
+    }
+
+    function stopSpeaking() {
+      if (ltSynth) ltSynth.cancel();
+      setState('idle');
+    }
+
+    // --- Open / close ---
+    function openLiveTalk() {
+      ltHistory = [];
+      if (transcript) transcript.innerHTML = '';
+      overlay.hidden = false;
+      ltOpen = true;
+      setState('idle');
+      if (!ltAnimFrame) drawWaveform();
+      setupMic();
+      closeAddMenu();
+    }
+
+    function closeLiveTalk() {
+      stopListening();
+      stopSpeaking();
+      stopMic();
+      overlay.hidden = true;
+      ltOpen = false;
+      if (ltAnimFrame) { cancelAnimationFrame(ltAnimFrame); ltAnimFrame = null; }
+    }
+
+    // --- Button wiring ---
+    if (menuLiveTalkBtn) {
+      menuLiveTalkBtn.addEventListener('click', openLiveTalk);
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeLiveTalk);
+    if (endBtn)   endBtn.addEventListener('click', closeLiveTalk);
+
+    if (talkBtn) {
+      talkBtn.addEventListener('click', function () {
+        if (ltState === 'ai') stopSpeaking();
+        if (ltState === 'user') { stopListening(); return; }
+        startListening();
+      });
+    }
+
+    if (stopBtn) {
+      stopBtn.addEventListener('click', function () {
+        stopSpeaking();
+      });
+    }
+
+    // Close on backdrop click
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeLiveTalk();
+    });
+
+    // Escape key closes Live Talk
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && ltOpen) closeLiveTalk();
+    });
+  }());
 
   // New Project button
   var newProjectBtn = document.getElementById('new-project-btn');
