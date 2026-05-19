@@ -280,82 +280,114 @@ function clearSettingsMessages() {
 
 // ===== EMAIL VERIFICATION =====
 
-// Generate a cryptographically stronger token using available browser APIs.
 function _generateVerificationToken() {
-  if (window.crypto && window.crypto.getRandomValues) {
-    var arr = new Uint8Array(24);
-    window.crypto.getRandomValues(arr);
-    return Array.from(arr).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-  }
-  return Math.random().toString(36).substring(2) + Date.now().toString(36) + Math.random().toString(36).substring(2);
+  var arr = new Uint8Array(32);
+  window.crypto.getRandomValues(arr);
+  return Array.from(arr).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
 }
 
-// Call /api/send-verification and return a Promise that resolves with { ok } or rejects with an error message.
 function _sendVerificationEmailRequest(email, token) {
   return fetch('/api/send-verification', {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, token: token })
-  }).then(function(res) {
-    return res.json().then(function(data) {
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to send verification email.');
-      }
+    body:    JSON.stringify({ email: email, token: token })
+  }).then(function (res) {
+    return res.json().then(function (data) {
+      if (!res.ok) throw new Error(data.error || 'Failed to send verification email.');
       return data;
     });
   });
 }
 
+function _setVerifMsg(text, color) {
+  // Update whichever message container is currently visible
+  ['verification-message', 'verification-expired-message'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { el.textContent = text; el.className = 'verification-message ' + (color || ''); }
+  });
+}
+
+function _showVerificationScreen(email) {
+  var loginEl  = document.getElementById('login-screen');
+  var verifEl  = document.getElementById('verification-screen');
+  var expireEl = document.getElementById('verification-expired-screen');
+  if (loginEl)  loginEl.style.display  = 'none';
+  if (verifEl)  verifEl.style.display  = 'flex';
+  if (expireEl) expireEl.style.display = 'none';
+  var disp = document.getElementById('verification-email-display');
+  if (disp && email) disp.textContent = email;
+}
+
+function _showExpiredScreen(email) {
+  var loginEl  = document.getElementById('login-screen');
+  var verifEl  = document.getElementById('verification-screen');
+  var expireEl = document.getElementById('verification-expired-screen');
+  if (loginEl)  loginEl.style.display  = 'none';
+  if (verifEl)  verifEl.style.display  = 'none';
+  if (expireEl) expireEl.style.display = 'flex';
+  var disp = document.getElementById('verification-expired-email');
+  if (disp && email) disp.textContent = email;
+}
+
+// Called by the Create Account button
 function createAccountWithVerification() {
-  var email = (document.getElementById('signup-email').value || '').trim().toLowerCase();
-  var password = document.getElementById('signup-password').value || '';
-  var confirm = document.getElementById('signup-confirm').value || '';
-  var errorEl = document.getElementById('signup-error');
+  var email    = (document.getElementById('signup-email').value    || '').trim().toLowerCase();
+  var password = document.getElementById('signup-password').value  || '';
+  var confirm  = document.getElementById('signup-confirm').value   || '';
+  var errorEl  = document.getElementById('signup-error');
+  var btn      = document.querySelector('#section-signup .submit-btn');
+
   errorEl.textContent = '';
 
-  if (!email || !password) {
-    errorEl.textContent = 'Please enter email and password.';
-    return;
-  }
+  if (!email || !password) { errorEl.textContent = 'Please enter email and password.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errorEl.textContent = 'Please enter a valid email address.'; return; }
+  if (password.length < 8) { errorEl.textContent = 'Password must be at least 8 characters.'; return; }
+  if (password !== confirm) { errorEl.textContent = 'Passwords do not match.'; return; }
 
-  if (password !== confirm) {
-    errorEl.textContent = 'Passwords do not match.';
-    return;
-  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating account...'; }
 
-  var token = _generateVerificationToken();
-  localStorage.setItem('hymenoptera_pending_email', email);
-  localStorage.setItem('hymenoptera_pending_token', token);
-  localStorage.setItem('hymenoptera_password_' + email, password);
-  localStorage.setItem('hymenoptera_needs_verification', 'true');
+  var SUPABASE_URL  = 'https://faiudaldfqmqlpyghgol.supabase.co';
+  var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhaXVkYWxkZnFtcWxweWdoZ29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNzY0MzcsImV4cCI6MjA5NDc1MjQzN30.JsIrG8f57Gi58gupLstLiUt8whYxzbIHVsxpc5wYEjE';
 
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('verification-screen').style.display = 'flex';
+  // Step 1: Register with Supabase Auth (email confirmation disabled — we handle it ourselves)
+  fetch(SUPABASE_URL + '/auth/v1/signup', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
+    body:    JSON.stringify({ email: email, password: password })
+  })
+  .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+  .then(function (result) {
+    if (!result.ok) {
+      var msg = (result.data && result.data.msg) || 'Account could not be created. Please try again.';
+      if (msg.toLowerCase().includes('already')) msg = 'An account with this email already exists. Please sign in.';
+      errorEl.textContent = msg;
+      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+      return;
+    }
 
-  var emailDisplay = document.getElementById('verification-email-display');
-  if (emailDisplay) emailDisplay.textContent = email;
+    // Step 2: Generate and send verification token
+    var token = _generateVerificationToken();
+    localStorage.setItem('hymenoptera_pending_email', email);
+    localStorage.setItem('hymenoptera_pending_token', token);
+    localStorage.setItem('hymenoptera_needs_verification', 'true');
 
-  var msgEl = document.getElementById('verification-message');
-  if (msgEl) {
-    msgEl.textContent = 'Sending verification email\u2026';
-    msgEl.style.color = '#aaa';
-  }
+    _showVerificationScreen(email);
+    _setVerifMsg('Sending verification email\u2026', 'verif-pending');
+    if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
 
-  _sendVerificationEmailRequest(email, token)
-    .then(function() {
-      if (msgEl) {
-        msgEl.textContent = 'Verification email sent. Please check your inbox and spam/junk folder.';
-        msgEl.style.color = '#90ee90';
-      }
-      localStorage.setItem('hymenoptera_last_verification_sent', Date.now().toString());
-    })
-    .catch(function(err) {
-      console.error('[createAccountWithVerification] Failed to send verification email:', err && err.message);
-      if (msgEl) {
-        msgEl.textContent = (err && err.message) || 'Your account was created, but we could not send the verification email. Please use the resend button.';
-        msgEl.style.color = '#ff6b6b';
-      }
-    });
+    _sendVerificationEmailRequest(email, token)
+      .then(function () {
+        _setVerifMsg('Verification email sent. Please check your inbox and spam folder.', 'verif-ok');
+        localStorage.setItem('hymenoptera_last_verification_sent', Date.now().toString());
+      })
+      .catch(function (err) {
+        _setVerifMsg((err && err.message) || 'Could not send verification email. Please use the resend button.', 'verif-err');
+      });
+  })
+  .catch(function () {
+    errorEl.textContent = 'Network error. Please check your connection and try again.';
+    if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+  });
 }
 
 function cancelVerification() {
@@ -363,90 +395,121 @@ function cancelVerification() {
   localStorage.removeItem('hymenoptera_pending_email');
   localStorage.removeItem('hymenoptera_pending_token');
   localStorage.removeItem('hymenoptera_last_verification_sent');
-
-  document.getElementById('verification-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
+  var verifEl  = document.getElementById('verification-screen');
+  var expireEl = document.getElementById('verification-expired-screen');
+  var loginEl  = document.getElementById('login-screen');
+  if (verifEl)  verifEl.style.display  = 'none';
+  if (expireEl) expireEl.style.display = 'none';
+  if (loginEl)  loginEl.style.display  = 'flex';
 }
 
 function resendVerificationEmail() {
-  var msgEl = document.getElementById('verification-message');
   var email = localStorage.getItem('hymenoptera_pending_email');
   var token = localStorage.getItem('hymenoptera_pending_token');
 
-  if (!email || !token) {
-    if (msgEl) {
-      msgEl.textContent = 'No pending verification found. Please sign up again.';
-      msgEl.style.color = '#ff6b6b';
-    }
+  if (!email) {
+    // Try to read email from the expired screen display
+    var expDisp = document.getElementById('verification-expired-email');
+    if (expDisp) email = expDisp.textContent.trim();
+  }
+
+  if (!email) {
+    _setVerifMsg('No pending verification found. Please sign up again.', 'verif-err');
     return;
   }
 
-  // Client-side rate limiting: enforce a 60-second cooldown between sends.
-  var lastSent = parseInt(localStorage.getItem('hymenoptera_last_verification_sent') || '0', 10);
+  // Enforce 60s client-side cooldown
+  var lastSent   = parseInt(localStorage.getItem('hymenoptera_last_verification_sent') || '0', 10);
+  var elapsed    = Date.now() - lastSent;
   var cooldownMs = 60 * 1000;
-  var elapsed = Date.now() - lastSent;
   if (elapsed < cooldownMs) {
     var remaining = Math.ceil((cooldownMs - elapsed) / 1000);
-    if (msgEl) {
-      msgEl.textContent = 'Please wait ' + remaining + ' second' + (remaining !== 1 ? 's' : '') + ' before requesting another email.';
-      msgEl.style.color = '#ffcc00';
-    }
+    _setVerifMsg('Please wait ' + remaining + ' second' + (remaining !== 1 ? 's' : '') + ' before resending.', 'verif-warn');
     return;
   }
 
-  if (msgEl) {
-    msgEl.textContent = 'Sending verification email\u2026';
-    msgEl.style.color = '#aaa';
-  }
+  // Generate a fresh token for the resend (old one may be expired in DB)
+  token = _generateVerificationToken();
+  localStorage.setItem('hymenoptera_pending_token', token);
+  localStorage.setItem('hymenoptera_pending_email', email);
+  localStorage.setItem('hymenoptera_needs_verification', 'true');
+
+  _setVerifMsg('Sending verification email\u2026', 'verif-pending');
 
   _sendVerificationEmailRequest(email, token)
-    .then(function() {
-      if (msgEl) {
-        msgEl.textContent = 'Verification email sent. Please check your inbox and spam/junk folder.';
-        msgEl.style.color = '#90ee90';
-      }
+    .then(function () {
+      _setVerifMsg('Verification email sent. Please check your inbox and spam folder.', 'verif-ok');
       localStorage.setItem('hymenoptera_last_verification_sent', Date.now().toString());
+      // If we were on the expired screen, switch back to normal verification screen
+      _showVerificationScreen(email);
     })
-    .catch(function(err) {
-      console.error('[resendVerificationEmail] Failed to resend verification email:', err && err.message);
-      if (msgEl) {
-        msgEl.textContent = (err && err.message) || 'Could not send verification email. Please try again later.';
-        msgEl.style.color = '#ff6b6b';
-      }
+    .catch(function (err) {
+      _setVerifMsg((err && err.message) || 'Could not send verification email. Please try again later.', 'verif-err');
     });
 }
 
+// Called on page load — checks for ?verify=<token> in URL and validates it server-side
 function checkVerificationToken() {
   var params = new URLSearchParams(window.location.search);
-  var token = params.get('verify');
+  var token  = params.get('verify');
+  if (!token) return;
 
-  if (token) {
-    var storedToken = localStorage.getItem('hymenoptera_pending_token');
-    if (token === storedToken) {
-      var email = localStorage.getItem('hymenoptera_pending_email');
+  // Clean the URL immediately so a page refresh doesn't re-process the token
+  history.replaceState(null, '', window.location.pathname);
+
+  // Show a brief "Verifying..." state while we call the server
+  var loginEl = document.getElementById('login-screen');
+  var verifEl = document.getElementById('verification-screen');
+  if (loginEl) loginEl.style.display = 'none';
+  if (verifEl) verifEl.style.display = 'flex';
+  _setVerifMsg('Verifying your email\u2026', 'verif-pending');
+
+  fetch('/api/verify-email', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ token: token })
+  })
+  .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; }); })
+  .then(function (result) {
+    if (result.ok && result.data.ok) {
+      // Success — save email, redirect to chat
+      var email = result.data.email || localStorage.getItem('hymenoptera_pending_email') || '';
       localStorage.removeItem('hymenoptera_needs_verification');
       localStorage.removeItem('hymenoptera_pending_token');
       localStorage.removeItem('hymenoptera_pending_email');
       localStorage.setItem('hymenoptera_user', email);
-      localStorage.setItem('hymenoptera_verified_' + email, 'true');
-      history.replaceState(null, '', window.location.pathname);
+
+      // Show success flash then open chat
+      _setVerifMsg('Email verified successfully! Opening Hymenoptera\u2026', 'verif-ok');
+      setTimeout(function () {
+        if (verifEl) verifEl.style.display = 'none';
+        var chatEl = document.getElementById('chat-screen');
+        if (chatEl) chatEl.style.display = 'flex';
+        if (typeof updateAccountDisplay === 'function') updateAccountDisplay();
+        if (typeof refreshPlanFromServer === 'function') refreshPlanFromServer(email);
+      }, 1200);
+
+    } else if (result.data && result.data.expired) {
+      // Token expired — show expired screen with resend option
+      var pendingEmail = localStorage.getItem('hymenoptera_pending_email') || '';
+      _showExpiredScreen(pendingEmail);
+
+    } else {
+      var msg = (result.data && result.data.error) || 'Verification failed. The link may be invalid.';
+      _setVerifMsg(msg, 'verif-err');
     }
-  }
+  })
+  .catch(function () {
+    _setVerifMsg('Network error while verifying. Please try again.', 'verif-err');
+  });
 }
 
 function checkVerificationState() {
   var needsVerification = localStorage.getItem('hymenoptera_needs_verification');
   var user = localStorage.getItem('hymenoptera_user');
-
   if (needsVerification === 'true' && !user) {
-    var loginScreen = document.getElementById('login-screen');
-    var verificationScreen = document.getElementById('verification-screen');
-    if (loginScreen) loginScreen.style.display = 'none';
-    if (verificationScreen) verificationScreen.style.display = 'flex';
-
-    var email = localStorage.getItem('hymenoptera_pending_email');
-    var emailDisplay = document.getElementById('verification-email-display');
-    if (emailDisplay && email) emailDisplay.textContent = email;
+    var email = localStorage.getItem('hymenoptera_pending_email') || '';
+    _showVerificationScreen(email);
   }
 }
 

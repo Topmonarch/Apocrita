@@ -211,7 +211,7 @@
     coding: 'Coding',
     vision: 'Vision',
     'image-generator': 'Image Creator',
-    'video-generator': 'Video Generator'
+    'video-generator': 'Video Creator'
   };
 
   var identityBlock = '\n\nYou are Hymenoptera, an advanced AI assistant. Your name is Hymenoptera. If a user asks who you are or asks if you are Hymenoptera, you must respond that you are Hymenoptera. You assist users with: conversations, coding, research, image generation, file analysis, business insights, and general knowledge. Always speak confidently as Hymenoptera and represent the Hymenoptera AI platform.';
@@ -1382,7 +1382,7 @@
         return;
       }
 
-      // Video Generator mode: route to /api/generate-video instead of /api/chat.
+      // Video Creator mode: route to /api/generate-video instead of /api/chat.
       // REFERENCE_LOCK_VIDEO_MODE is activated automatically when reference images
       // are present, preserving the uploaded subject's identity and design.
       if (convModel === 'video-generator') {

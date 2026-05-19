@@ -1223,6 +1223,183 @@
       }
     }
 
+    /* ===== EMAIL VERIFICATION SCREENS ===== */
+    #verification-screen,
+    #verification-expired-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 8000;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .verif-window {
+      width: 400px;
+      max-width: 94vw;
+      background: #ece9d8;
+      border: 2px solid #0a246a;
+      border-radius: 8px 8px 4px 4px;
+      box-shadow:
+        0 10px 40px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.55);
+      overflow: hidden;
+      font-family: var(--font-ui);
+    }
+
+    .verif-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      background: linear-gradient(180deg,
+        #2a6dd9 0%, #1e4fa8 40%, #1a45a0 60%, #2060c8 100%);
+      border-bottom: 1px solid #0a246a;
+      user-select: none;
+    }
+
+    .verif-titlebar-warn {
+      background: linear-gradient(180deg,
+        #d48a18 0%, #b06010 40%, #9a5008 60%, #c07018 100%);
+      border-bottom-color: #5a2800;
+    }
+
+    .verif-titlebar-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .verif-titlebar-title {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .verif-body {
+      padding: 24px 28px 20px;
+      text-align: center;
+      background: #ece9d8;
+    }
+
+    .verif-big-icon {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .verif-heading {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #0a246a;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    }
+
+    .verif-text {
+      margin: 0 0 6px;
+      font-size: 13px;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .verif-text-sub {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .verif-email-display {
+      display: inline-block;
+      padding: 4px 12px;
+      margin: 4px 0 10px;
+      background: #fff;
+      border: 1px inset #a0a0a0;
+      border-radius: 3px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0a246a;
+      word-break: break-all;
+    }
+
+    .verif-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .verif-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 16px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.8),
+        0 2px 4px rgba(0,0,0,0.2);
+      transition: background 0.1s;
+      border: 1px solid;
+    }
+
+    .verif-btn-primary {
+      background: linear-gradient(180deg, #f5f4f0 0%, #d4d0c8 100%);
+      border-color: #7a7773;
+      color: #1a1a1a;
+    }
+
+    .verif-btn-primary:hover {
+      background: linear-gradient(180deg, #4a8fde 0%, #1e5fb4 100%);
+      border-color: #0a3a80;
+      color: #fff;
+    }
+
+    .verif-btn-secondary {
+      background: linear-gradient(180deg, #f0f0ec 0%, #c8c5bc 100%);
+      border-color: #9a9790;
+      color: #444;
+    }
+
+    .verif-btn-secondary:hover {
+      background: linear-gradient(180deg, #e0ddd8 0%, #b8b5ac 100%);
+      color: #111;
+    }
+
+    .verif-btn-icon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .verification-message {
+      min-height: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      padding: 4px 0;
+      border-radius: 3px;
+    }
+
+    .verif-ok      { color: #1a6a1a; }
+    .verif-err     { color: #8b0000; }
+    .verif-warn    { color: #7a4a00; }
+    .verif-pending { color: #555; }
+
     /* ===== LIVE TALK MODAL ===== */
     .lt-overlay {
       position: fixed;
@@ -1552,7 +1729,7 @@
             <div class="model-option" data-model="coding">Coding</div>
             <div class="model-option" data-model="vision">Vision</div>
             <div class="model-option" data-model="image-generator">Image Creator</div>
-            <div class="model-option" data-model="video-generator">Video Generator</div>
+            <div class="model-option" data-model="video-generator">Video Creator</div>
           </div>
         </div>
 
@@ -1598,9 +1775,9 @@
               <img src="public/icons/Add.png" class="toolbar-icon" alt="Add" />
             </button>
             <div id="add-menu-popup" class="xp-popup-menu" hidden>
-              <button class="xp-menu-item" id="menu-camera-btn" title="Digital Camera / image">
+              <button class="xp-menu-item" id="menu-camera-btn" title="Camera / image upload">
                 <img src="public/icons/digital-camera.png" class="xp-menu-icon" alt="" />
-                <span>Digital Camera</span>
+                <span>Camera</span>
               </button>
               <button class="xp-menu-item" id="menu-voice-btn" title="Speech to Text">
                 <img src="public/icons/Speech.png" class="xp-menu-icon" alt="" />
@@ -1631,18 +1808,59 @@
     </div>
 
     <!-- Email Verification Screen -->
-    <div id="verification-screen">
-      <div class="verification-box">
-        <div class="verification-icon">✉️</div>
-        <h2>VERIFY YOUR EMAIL</h2>
-        <p>We've sent a verification link to:</p>
-        <div class="verification-email-display" id="verification-email-display"></div>
-        <p>Click the link in your email to activate your account and start using Hymenoptera.</p>
-        <div class="verification-actions">
-          <button class="submit-btn" onclick="resendVerificationEmail()">Resend Verification Email</button>
-          <button class="guest-btn" onclick="cancelVerification()">Back to Sign In</button>
+    <div id="verification-screen" style="display:none;">
+      <div class="verif-window">
+        <!-- XP Luna titlebar -->
+        <div class="verif-titlebar">
+          <img src="public/icons/Email.png" class="verif-titlebar-icon" alt="" />
+          <span class="verif-titlebar-title">Hymenoptera — Email Verification</span>
         </div>
-        <div id="verification-message"></div>
+        <div class="verif-body">
+          <img src="public/icons/Email.png" class="verif-big-icon" alt="" />
+          <h2 class="verif-heading">VERIFY YOUR EMAIL</h2>
+          <p class="verif-text">A verification link has been sent to:</p>
+          <div class="verif-email-display" id="verification-email-display"></div>
+          <p class="verif-text verif-text-sub">Click the link in your email to activate your account.<br>Check your spam or junk folder if you don't see it.</p>
+          <div class="verif-actions">
+            <button class="verif-btn verif-btn-primary" onclick="resendVerificationEmail()">
+              <img src="public/icons/OE Send.png" class="verif-btn-icon" alt="" />
+              Resend Email
+            </button>
+            <button class="verif-btn verif-btn-secondary" onclick="cancelVerification()">
+              <img src="public/icons/Back.png" class="verif-btn-icon" alt="" />
+              Back to Sign In
+            </button>
+          </div>
+          <div id="verification-message" class="verification-message"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Expired Screen -->
+    <div id="verification-expired-screen" style="display:none;">
+      <div class="verif-window">
+        <div class="verif-titlebar verif-titlebar-warn">
+          <img src="public/icons/Alert.png" class="verif-titlebar-icon" alt="" />
+          <span class="verif-titlebar-title">Hymenoptera — Link Expired</span>
+        </div>
+        <div class="verif-body">
+          <img src="public/icons/Alert.png" class="verif-big-icon" alt="" />
+          <h2 class="verif-heading">VERIFICATION LINK EXPIRED</h2>
+          <p class="verif-text">The verification link has expired for:</p>
+          <div class="verif-email-display" id="verification-expired-email"></div>
+          <p class="verif-text verif-text-sub">Verification links are valid for 24 hours.<br>Request a new one below.</p>
+          <div class="verif-actions">
+            <button class="verif-btn verif-btn-primary" onclick="resendVerificationEmail()">
+              <img src="public/icons/OE Send.png" class="verif-btn-icon" alt="" />
+              Send New Link
+            </button>
+            <button class="verif-btn verif-btn-secondary" onclick="cancelVerification()">
+              <img src="public/icons/Back.png" class="verif-btn-icon" alt="" />
+              Back to Sign In
+            </button>
+          </div>
+          <div id="verification-expired-message" class="verification-message"></div>
+        </div>
       </div>
     </div>
 
