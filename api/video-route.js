@@ -293,10 +293,9 @@ module.exports = async function handler(req, res) {
 
     // ── Logging: route selection ──────────────────────────────────────────────
 
-    console.log('[DEBUG] Prompt:', safePrompt);
     const provider = (process.env.VIDEO_PROVIDER || DEFAULT_PROVIDER).toLowerCase();
     console.log('[Hymenoptera Routing] selected_route=VIDEO_GENERATION_ROUTE');
-    console.log('[Hymenoptera Video] model=' + provider);
+    console.log('[Hymenoptera Video] model=' + provider + ' prompt_length=' + safePrompt.length);
 
     // ── Validate reference images ─────────────────────────────────────────────
 

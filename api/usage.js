@@ -42,12 +42,12 @@ module.exports = async function handler(req, res) {
 
     res.setHeader('Content-Type', 'application/json');
     return res.status(200).json({
-      messages_used: data.messages_used,
-      images_used: data.images_used,
-      videos_used: data.videos_used,
+      messages_used:  data.messages_used,
+      images_used:    data.images_used,
+      videos_used:    data.videos_used,
       messages_limit: limits.messages_per_day,
-      images_limit: limits.images_per_day,
-      videos_limit: limits.videos_per_day
+      images_limit:   limits.images_per_day,
+      videos_limit:   limits.videos_per_day
     });
   } catch (e) {
     console.warn('api/usage: failed to fetch usage:', e.message);
