@@ -9,14 +9,19 @@
     :root {
       --accent-color: #2D8CFF;
       --accent-glow: rgba(45,140,255,0.6);
+      --font-ui: Tahoma, Verdana, sans-serif;
     }
 
-    * { box-sizing: border-box; }
+    /* Force every element — including form controls — to inherit the XP font */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      font-family: inherit;
+    }
 
     body {
       background: #0b0f14;
       color: white;
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
       margin: 0;
       height: 100vh;
       height: 100dvh;
@@ -273,7 +278,7 @@
       color: white;
       font-size: 14px;
       outline: none;
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
     }
 
     .command-input::placeholder {
@@ -719,7 +724,7 @@
     }
 
     .copy-feedback {
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
       font-size: 13px;
       font-weight: 700;
       color: #5cb85c;
@@ -951,7 +956,7 @@
     }
 
     .send-label {
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
       font-size: 14px;
       font-weight: 600;
       line-height: 1;
@@ -1031,7 +1036,7 @@
       border: 1px solid transparent;
       border-radius: 4px;
       cursor: pointer;
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
       font-size: 12px;
       font-weight: 600;
       color: #0a246a;
@@ -1065,7 +1070,7 @@
     }
 
     .voice-listening-label {
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
       font-size: 12px;
       font-weight: 600;
       color: inherit;
@@ -1240,7 +1245,7 @@
       box-shadow:
         0 8px 32px rgba(0,0,0,0.55),
         inset 0 1px 0 rgba(255,255,255,0.6);
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
       overflow: hidden;
     }
 
@@ -1348,7 +1353,7 @@
       background: linear-gradient(180deg, #f5f4f0 0%, #d8d5cc 50%, #ccc9be 100%);
       border: 1px solid #7a7773;
       border-radius: 3px;
-      font-family: Tahoma, Arial, sans-serif;
+      font-family: var(--font-ui);
       font-size: 12px;
       font-weight: 600;
       color: #1a1a1a;

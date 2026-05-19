@@ -906,12 +906,12 @@
     dlBtn.target = '_blank';
     dlBtn.rel = 'noopener noreferrer';
     dlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download';
-    dlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
+    dlBtn.style.cssText = 'font-family:Tahoma,Verdana,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
     btnRow.appendChild(dlBtn);
 
     var recreateBtn = document.createElement('button');
     recreateBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
-    recreateBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
+    recreateBtn.style.cssText = 'font-family:Tahoma,Verdana,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
     (function (p) {
       recreateBtn.addEventListener('click', function () {
         if (messageInput) messageInput.value = p;
@@ -1178,12 +1178,12 @@
             vrDlBtn.target = '_blank';
             vrDlBtn.rel = 'noopener noreferrer';
             vrDlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download Video';
-            vrDlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
+            vrDlBtn.style.cssText = 'font-family:Tahoma,Verdana,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
             vrBtnRow.appendChild(vrDlBtn);
 
             var vrRegenBtn = document.createElement('button');
             vrRegenBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
-            vrRegenBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
+            vrRegenBtn.style.cssText = 'font-family:Tahoma,Verdana,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
             vrRegenBtn.addEventListener('click', function () {
               if (messageInput) messageInput.value = message;
               sendMessage();
@@ -1460,12 +1460,12 @@
             vidDlBtn.target = '_blank';
             vidDlBtn.rel = 'noopener noreferrer';
             vidDlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download Video';
-            vidDlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
+            vidDlBtn.style.cssText = 'font-family:Tahoma,Verdana,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
             vidBtnRow.appendChild(vidDlBtn);
 
             var vidRegenBtn = document.createElement('button');
             vidRegenBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
-            vidRegenBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
+            vidRegenBtn.style.cssText = 'font-family:Tahoma,Verdana,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
             vidRegenBtn.addEventListener('click', function () {
               if (messageInput) messageInput.value = message;
               sendMessage();
