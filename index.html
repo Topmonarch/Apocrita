@@ -978,13 +978,6 @@
       }
     }
 
-    /* Camera button: always visible; desktop gets file picker, mobile gets native camera */
-    #camera-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .toolbar-icon {
       width: 20px;
       height: 20px;
@@ -993,30 +986,90 @@
       flex-shrink: 0;
     }
 
-    .voice-listening-label {
-      font-family: Tahoma, Arial, sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      color: #fff;
-      white-space: nowrap;
-      margin-left: 4px;
+    /* ===== ADD MENU ===== */
+    #add-menu-wrap {
+      position: relative;
+      flex-shrink: 0;
     }
 
-    /* Voice button: visible on all devices */
-    #voice-btn {
+    #add-menu-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
-    #voice-btn.listening {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: linear-gradient(180deg, #e53935, #b71c1c);
+    /* XP-style popup panel */
+    .xp-popup-menu {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 0;
+      z-index: 1200;
+      background: linear-gradient(180deg, #e8f0fb 0%, #d0ddf5 100%);
+      border: 1px solid #5a7abf;
+      border-radius: 6px;
       box-shadow:
-        0 6px 18px rgba(0,0,0,0.4),
-        0 0 12px rgba(229,57,53,0.5);
+        0 4px 18px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      padding: 4px;
+      min-width: 160px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .xp-popup-menu[hidden] {
+      display: none;
+    }
+
+    .xp-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #0a246a;
+      text-align: left;
+      transition: background 0.1s, border-color 0.1s;
+      white-space: nowrap;
+    }
+
+    .xp-menu-item:hover {
+      background: linear-gradient(180deg, #4a90d9 0%, #1e5fb4 100%);
+      border-color: #2354a0;
+      color: #fff;
+    }
+
+    .xp-menu-item:active {
+      background: linear-gradient(180deg, #1e5fb4 0%, #4a90d9 100%);
+    }
+
+    .xp-menu-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    /* Listening state on the in-menu voice button */
+    #menu-voice-btn.listening {
+      background: linear-gradient(180deg, #e53935, #b71c1c);
+      border-color: #8b0000;
+      color: #fff;
+    }
+
+    .voice-listening-label {
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: inherit;
+      white-space: nowrap;
     }
 
     /* ===== MOBILE / TABLET DRAWER ===== */
@@ -1322,13 +1375,30 @@
           </div>
         </div>
         <div id="input-row">
+          <!-- Add menu anchor + popup -->
+          <div id="add-menu-wrap">
+            <button id="add-menu-btn" class="send-btn" title="Add attachment or input">
+              <img src="public/icons/Add.png" class="toolbar-icon" alt="Add" />
+            </button>
+            <div id="add-menu-popup" class="xp-popup-menu" hidden>
+              <button class="xp-menu-item" id="menu-camera-btn" title="Digital Camera / image">
+                <img src="public/icons/digital-camera.png" class="xp-menu-icon" alt="" />
+                <span>Digital Camera</span>
+              </button>
+              <button class="xp-menu-item" id="menu-voice-btn" title="Speech to Text">
+                <img src="public/icons/Speech.png" class="xp-menu-icon" alt="" />
+                <span>Speech-to-Text</span>
+              </button>
+              <button class="xp-menu-item" id="menu-attach-btn" title="Attach file">
+                <img src="public/icons/OE Attatch.png" class="xp-menu-icon" alt="" />
+                <span>Attach File</span>
+              </button>
+            </div>
+          </div>
           <input id="message-input" placeholder="Ask something..."
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}" />
           <input type="file" id="file-upload" accept=".txt,.md,.js,.ts,.jsx,.tsx,.py,.html,.htm,.css,.json,.xml,.yaml,.yml,.sh,.java,.c,.cpp,.go,.rs,.rb,.php,.sql,.csv,.log,.pdf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.avi,.webm,.mkv" style="display:none;" multiple />
           <input type="file" id="imageInput" accept="image/*" style="display:none;" />
-          <button id="file-upload-button" class="send-btn" onclick="document.getElementById('file-upload').click()" title="Upload file"><img src="public/icons/OE Attatch.png" class="toolbar-icon" alt="Attach file" /></button>
-          <button id="camera-btn" class="send-btn" title="Upload image"><img src="public/icons/digital-camera.png" class="toolbar-icon" alt="Upload image" /></button>
-          <button id="voice-btn" class="send-btn" title="Voice input"><img src="public/icons/Speech.png" class="toolbar-icon" alt="Voice input" /></button>
           <!-- send button text is white, glow remains blue -->
           <button class="send-btn glow" onclick="sendMessage()" title="Send">
             <img src="public/icons/OE Send.png" class="send-icon" alt="" aria-hidden="true" />

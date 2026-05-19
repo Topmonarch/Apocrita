@@ -1652,14 +1652,10 @@
     renderChatHistory();
     // Clear uploaded file context for the new conversation
     uploadedFileContent = '';
-    var fileUploadBtn = document.getElementById('file-upload-button');
-    if (fileUploadBtn) fileUploadBtn.title = 'Upload file';
     var fileInput = document.getElementById('file-upload');
     if (fileInput) fileInput.value = '';
     // Clear uploaded image for the new conversation
     uploadedImageData = '';
-    var camBtn = document.getElementById('camera-btn');
-    if (camBtn) camBtn.title = 'Upload image';
     // Clear any pending image attachments for the new conversation
     pendingImageAttachments = [];
     renderAttachmentTray();
@@ -1715,8 +1711,6 @@
    * so the content can be used as context in subsequent chat messages.
    */
   async function processUploadedFile(file, base64Data, category) {
-    var fileUploadBtn = document.getElementById('file-upload-button');
-
     // Ensure there is an active chat to display the analysis in.
     if (!currentChatId) {
       currentChatId = generateChatId();
@@ -1808,8 +1802,6 @@
     fileUploadInput.addEventListener('change', function (event) {
       var files = Array.prototype.slice.call(event.target.files);
       if (!files.length) return;
-      var fileUploadBtn = document.getElementById('file-upload-button');
-
       files.forEach(function (file) {
         var category = detectUploadCategory(file);
 
@@ -1818,9 +1810,6 @@
           var reader = new FileReader();
           reader.onload = function (e) {
             addImageAttachment(e.target.result, file.type, file.name);
-          };
-          reader.onerror = function () {
-            if (fileUploadBtn) fileUploadBtn.title = 'File upload failed';
           };
           reader.readAsDataURL(file);
         } else if (category === 'text') {
@@ -1832,7 +1821,6 @@
             if (!projects[currentProject].files) projects[currentProject].files = [];
             projects[currentProject].files.push(uploadedFileContent);
             saveConversations();
-            if (fileUploadBtn) fileUploadBtn.title = 'File loaded: ' + file.name;
 
             // Also send to upload endpoint for inline AI analysis.
             var b64Reader = new FileReader();
@@ -1843,10 +1831,6 @@
             };
             b64Reader.readAsDataURL(file);
           };
-          textReader.onerror = function () {
-            uploadedFileContent = '';
-            if (fileUploadBtn) fileUploadBtn.title = 'File upload failed';
-          };
           textReader.readAsText(file);
         } else {
           // PDF, video: read as base64 DataURL, strip the prefix, send to endpoint.
@@ -1855,9 +1839,6 @@
             var dataUrl = ev.target.result || '';
             var base64 = dataUrl.indexOf(',') !== -1 ? dataUrl.split(',')[1] : dataUrl;
             processUploadedFile(file, base64, category);
-          };
-          b64Reader.onerror = function () {
-            if (fileUploadBtn) fileUploadBtn.title = 'File upload failed';
           };
           b64Reader.readAsDataURL(file);
         }
@@ -1873,10 +1854,34 @@
     return /Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent);
   }
 
+  // ===== ADD MENU =====
+  var addMenuWrap  = document.getElementById('add-menu-wrap');
+  var addMenuBtn   = document.getElementById('add-menu-btn');
+  var addMenuPopup = document.getElementById('add-menu-popup');
+
+  function closeAddMenu() {
+    if (addMenuPopup) addMenuPopup.hidden = true;
+  }
+
+  if (addMenuBtn && addMenuPopup) {
+    addMenuBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      addMenuPopup.hidden = !addMenuPopup.hidden;
+    });
+  }
+
+  // Close menu when clicking anywhere outside
+  document.addEventListener('click', function (e) {
+    if (addMenuWrap && !addMenuWrap.contains(e.target)) {
+      closeAddMenu();
+    }
+  });
+
   // Camera / image input: file picker on desktop, native camera on mobile
-  var cameraBtn = document.getElementById('camera-btn');
-  if (cameraBtn) {
-    cameraBtn.addEventListener('click', function () {
+  var menuCameraBtn = document.getElementById('menu-camera-btn');
+  if (menuCameraBtn) {
+    menuCameraBtn.addEventListener('click', function () {
+      closeAddMenu();
       var input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
@@ -1896,6 +1901,16 @@
         reader.readAsDataURL(file);
       };
       input.click();
+    });
+  }
+
+  // Attach File: trigger the existing hidden file input
+  var menuAttachBtn = document.getElementById('menu-attach-btn');
+  if (menuAttachBtn) {
+    menuAttachBtn.addEventListener('click', function () {
+      closeAddMenu();
+      var fileUpload = document.getElementById('file-upload');
+      if (fileUpload) fileUpload.click();
     });
   }
 
@@ -2001,22 +2016,24 @@
   }
 
   function updateVoiceIndicator(active) {
-    var voiceBtn = document.getElementById('voice-btn');
-    if (!voiceBtn) return;
+    var btn = document.getElementById('menu-voice-btn');
+    if (!btn) return;
+    var iconImg = '<img src="public/icons/Speech.png" class="xp-menu-icon" alt="" />';
     if (active) {
-      voiceBtn.innerHTML = '<img src="public/icons/Speech.png" class="toolbar-icon" alt="Voice input" /><span class="voice-listening-label">Listening...</span>';
-      voiceBtn.classList.add('listening');
+      btn.innerHTML = iconImg + '<span class="voice-listening-label">Listening...</span>';
+      btn.classList.add('listening');
     } else {
-      voiceBtn.innerHTML = '<img src="public/icons/Speech.png" class="toolbar-icon" alt="Voice input" />';
-      voiceBtn.classList.remove('listening');
+      btn.innerHTML = iconImg + '<span>Speech-to-Text</span>';
+      btn.classList.remove('listening');
     }
   }
 
-  var voiceBtn = document.getElementById('voice-btn');
-  if (voiceBtn) {
-    voiceBtn.addEventListener('click', function () {
+  var menuVoiceBtn = document.getElementById('menu-voice-btn');
+  if (menuVoiceBtn) {
+    menuVoiceBtn.addEventListener('click', function () {
       if (!recognition) {
         alert('Speech recognition is not supported in this browser.');
+        closeAddMenu();
         return;
       }
       if (isListening) {
@@ -2024,12 +2041,14 @@
         recognition.stop();
         isListening = false;
         updateVoiceIndicator(false);
+        closeAddMenu();
       } else {
         voiceCancelled = false;
         try {
           recognition.start();
           isListening = true;
           updateVoiceIndicator(true);
+          // Keep menu open so user can see Listening... state; they close it or click again
         } catch (e) {
           // recognition may already be running; ignore
         }
