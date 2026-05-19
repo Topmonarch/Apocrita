@@ -929,8 +929,10 @@
     }
 
     .send-icon {
+      width: 16px;
+      height: 16px;
       flex-shrink: 0;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55));
+      image-rendering: pixelated;
     }
 
     .send-label {
@@ -1103,8 +1105,8 @@
       }
 
       .send-icon {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
       }
 
       #message-input {
@@ -1286,27 +1288,7 @@
           <button id="voice-btn" class="send-btn" title="Voice input">🎤</button>
           <!-- send button text is white, glow remains blue -->
           <button class="send-btn glow" onclick="sendMessage()" title="Send">
-            <svg class="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="18" height="18" aria-hidden="true">
-              <defs>
-                <!-- XP Luna glossy blue fill -->
-                <linearGradient id="xpSendBody" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stop-color="#6ec6ff"/>
-                  <stop offset="48%"  stop-color="#2472d4"/>
-                  <stop offset="100%" stop-color="#0d3a8e"/>
-                </linearGradient>
-                <!-- White gloss sheen on upper portion -->
-                <linearGradient id="xpSendGloss" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.75"/>
-                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
-                </linearGradient>
-              </defs>
-              <!-- Paper-plane body -->
-              <polygon points="1,11 21,1 16,11 21,21" fill="url(#xpSendBody)" stroke="#0a2a70" stroke-width="0.7" stroke-linejoin="round"/>
-              <!-- Fold crease (lower tail) -->
-              <polygon points="16,11 21,21 10,14" fill="#1a55b0" stroke="#0a2a70" stroke-width="0.5" stroke-linejoin="round"/>
-              <!-- Glossy sheen overlay on upper half -->
-              <polygon points="1,11 21,1 16,11" fill="url(#xpSendGloss)" opacity="0.55"/>
-            </svg>
+            <img src="/icons/OE Send.png" class="send-icon" alt="" aria-hidden="true" />
             <span class="send-label">Send</span>
           </button>
         </div>
