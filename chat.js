@@ -210,7 +210,7 @@
     smart: 'Smart',
     coding: 'Coding',
     vision: 'Vision',
-    'image-generator': 'Image Generator',
+    'image-generator': 'Image Creator',
     'video-generator': 'Video Generator'
   };
 
@@ -1122,8 +1122,8 @@
             vrBtnRow.appendChild(vrDlBtn);
 
             var vrRegenBtn = document.createElement('button');
-            vrRegenBtn.textContent = '\uD83D\uDD04 Regenerate';
-            vrRegenBtn.style.cssText = 'font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;';
+            vrRegenBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
+            vrRegenBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
             vrRegenBtn.addEventListener('click', function () {
               if (messageInput) messageInput.value = message;
               sendMessage();
@@ -1235,7 +1235,7 @@
 
         // Update typing indicator to show image-specific generating message
         if (typingIndicator && typingIndicator.parentNode) {
-          typingIndicator.innerText = 'Generating image\u2026';
+          typingIndicator.innerText = 'Creating image\u2026';
         }
         clearInterval(dotInterval);
 
@@ -1305,8 +1305,8 @@
           dlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
           btnRow.appendChild(dlBtn);
           var regenBtn = document.createElement('button');
-          regenBtn.textContent = '🔄 Regenerate';
-          regenBtn.style.cssText = 'font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;';
+          regenBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
+          regenBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
           regenBtn.addEventListener('click', function () {
             if (messageInput) messageInput.value = message;
             sendMessage();
@@ -1416,8 +1416,8 @@
             vidBtnRow.appendChild(vidDlBtn);
 
             var vidRegenBtn = document.createElement('button');
-            vidRegenBtn.textContent = '\uD83D\uDD04 Regenerate';
-            vidRegenBtn.style.cssText = 'font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;';
+            vidRegenBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
+            vidRegenBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
             vidRegenBtn.addEventListener('click', function () {
               if (messageInput) messageInput.value = message;
               sendMessage();
