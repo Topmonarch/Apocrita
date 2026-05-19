@@ -741,7 +741,13 @@
     setTimeout(function () {
       clearChatUI();
       chatMessages.forEach(function (msg) {
-        addMessage(msg.role, msg.content);
+        // Pass the full message object so addMessage can render image thumbnails
+        // if this is a user message that has a stored .images array.
+        if (msg.role === 'user' && msg.images && msg.images.length > 0) {
+          addMessage(msg.role, msg);
+        } else {
+          addMessage(msg.role, msg.content);
+        }
       });
       // Show welcome message for empty conversations
       if (chatMessages.length === 0) {
@@ -838,14 +844,55 @@
     bubble.appendChild(makeCopyBtn(function () { return textSpan.innerText; }));
   }
 
+  // Render a user bubble that contains optional text and image thumbnails.
+  // attachments is an array of { dataUrl, name }.
+  function renderUserBubbleWithImages(text, attachments) {
+    if (!messagesEl) return;
+    hideEmptyState();
+    var userBubble = document.createElement('div');
+    userBubble.className = 'message user';
+    if (text) {
+      var textNode = document.createElement('div');
+      textNode.style.marginBottom = '6px';
+      textNode.innerText = text;
+      userBubble.appendChild(textNode);
+    }
+    if (attachments && attachments.length > 0) {
+      var thumbRow = document.createElement('div');
+      thumbRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;';
+      attachments.forEach(function (att) {
+        var tImg = document.createElement('img');
+        tImg.src = att.dataUrl;
+        tImg.alt = att.name || 'image';
+        tImg.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:4px;cursor:pointer;';
+        tImg.title = att.name || 'image';
+        tImg.addEventListener('click', function () {
+          var win = window.open('', '_blank');
+          if (win) { win.document.write('<img src="' + att.dataUrl + '" style="max-width:100%;max-height:100vh;">'); }
+        });
+        thumbRow.appendChild(tImg);
+      });
+      userBubble.appendChild(thumbRow);
+    }
+    messagesEl.appendChild(userBubble);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
   function addMessage(type, text) {
     if (!messagesEl) return;
     hideEmptyState();
+    // Handle structured messages with images (from reloaded history)
+    if (type === 'user' && text && typeof text === 'object' && text.content) {
+      var imgs = text.images || null;
+      var textContent = (text.content || '').replace(/\n?\uD83D\uDDBC\uFE0F\s*\d*\s*image[s]?\s*attached\s*$/i, '').trim();
+      renderUserBubbleWithImages(textContent, imgs);
+      return;
+    }
     var div = document.createElement('div');
     div.className = 'message ' + type;
     var textSpan = document.createElement('span');
     textSpan.className = 'msg-text';
-    textSpan.innerText = text;
+    textSpan.innerText = typeof text === 'string' ? text : (text && text.content ? text.content : String(text));
     div.appendChild(textSpan);
     div.appendChild(makeCopyBtn(function () { return textSpan.innerText; }));
     messagesEl.appendChild(div);
@@ -934,45 +981,28 @@
 
     // Append user message to conversation memory before sending.
     // The full history (all prior messages + this new one) will be sent to the backend.
-    // When images are attached, store a text summary in history and show thumbnails in the bubble.
+    // When images are attached, store them with the message so thumbnails persist in history.
     var attachmentsCopy = pendingImageAttachments.slice(); // snapshot before clearing
     var historyContent = message;
+    var historyImages = null;
     if (attachmentsCopy.length > 0) {
       var imgLabel = attachmentsCopy.length === 1
         ? '\uD83D\uDDBC\uFE0F 1 image attached'
         : '\uD83D\uDDBC\uFE0F ' + attachmentsCopy.length + ' images attached';
       historyContent = message ? message + '\n' + imgLabel : imgLabel;
+      // Store the data URLs so thumbnails can be re-rendered when the chat is reloaded
+      historyImages = attachmentsCopy.map(function (a) { return { dataUrl: a.dataUrl, name: a.name }; });
     }
-    conversations[currentChatId].messages.push({ role: 'user', content: historyContent });
+    var historyMsg = { role: 'user', content: historyContent };
+    if (historyImages) historyMsg.images = historyImages;
+    conversations[currentChatId].messages.push(historyMsg);
     // Show the user bubble with optional image thumbnails
     if (attachmentsCopy.length > 0) {
-      var userBubble = document.createElement('div');
-      userBubble.className = 'message user';
-      if (message) {
-        var textNode = document.createElement('div');
-        textNode.style.marginBottom = '6px';
-        textNode.innerText = message;
-        userBubble.appendChild(textNode);
-      }
-      var thumbRow = document.createElement('div');
-      thumbRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;';
-      attachmentsCopy.forEach(function (att) {
-        var tImg = document.createElement('img');
-        tImg.src = att.dataUrl;
-        tImg.alt = att.name;
-        tImg.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:4px;';
-        thumbRow.appendChild(tImg);
-      });
-      userBubble.appendChild(thumbRow);
-      if (messagesEl) {
-        hideEmptyState();
-        messagesEl.appendChild(userBubble);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      }
+      renderUserBubbleWithImages(message, attachmentsCopy);
     } else {
       addMessage('user', message);
     }
-    saveMessageToHistory({ role: 'user', content: historyContent });
+    saveMessageToHistory(historyMsg);
     saveConversations();
     messageInput.value = '';
     // Clear pending attachments after capturing them
@@ -1203,16 +1233,43 @@
           imageInputEl.value = '';
         }
 
-        var imgResponse = await fetch('/api/generate-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(imgPayload)
-        });
+        // Update typing indicator to show image-specific generating message
+        if (typingIndicator && typingIndicator.parentNode) {
+          typingIndicator.innerText = 'Generating image\u2026';
+        }
         clearInterval(dotInterval);
+
+        var imgResponse;
+        try {
+          imgResponse = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(imgPayload)
+          });
+        } catch (fetchErr) {
+          console.error('[Image Generation] fetch error:', fetchErr);
+          var netErrMsg = 'Image generation failed: could not reach the server. Check your connection.';
+          if (typingIndicator) {
+            typingIndicator.classList.remove('typing-indicator');
+            typingIndicator.innerText = netErrMsg;
+            convertToCopyableBubble(typingIndicator);
+          }
+          assistantText = netErrMsg;
+          conversations[currentChatId].messages.push({ role: 'assistant', content: assistantText });
+          saveMessageToHistory({ role: 'assistant', content: assistantText });
+          saveConversations();
+          setStatus('Ready');
+          if (messageInput) messageInput.focus();
+          return;
+        }
+
         if (!imgResponse.ok) {
           var imgErr = null;
           try { imgErr = await imgResponse.json(); } catch (e) { /* ignore */ }
-          var errMsg = (imgErr && imgErr.error && imgErr.error.message) || 'Image generation failed';
+          var errMsg = (imgErr && imgErr.error && imgErr.error.message)
+            || (imgErr && typeof imgErr.error === 'string' ? imgErr.error : null)
+            || 'Image generation failed (HTTP ' + imgResponse.status + ')';
+          console.error('[Image Generation] API error:', imgResponse.status, errMsg, imgErr);
           if (typingIndicator) {
             typingIndicator.classList.remove('typing-indicator');
             typingIndicator.innerText = errMsg;
