@@ -7,17 +7,14 @@
   "functions": {
     "api/chat.js":             { "maxDuration": 60 },
     "api/generate-image.js":   { "maxDuration": 120 },
-    "api/generate-video.js":   { "maxDuration": 120 },
-    "api/video-route.js":      { "maxDuration": 120 },
+    "api/video.js":            { "maxDuration": 120 },
     "api/upload-file.js":      { "maxDuration": 30 },
     "api/stripe-webhook.js":   { "maxDuration": 30 },
     "api/send-verification.js":{ "maxDuration": 30 },
     "api/verify-email.js":     { "maxDuration": 15 },
     "api/create-checkout.js":  { "maxDuration": 15 },
     "api/billing-portal.js":   { "maxDuration": 15 },
-    "api/plan.js":             { "maxDuration": 15 },
-    "api/usage.js":            { "maxDuration": 10 },
-    "api/gemini.js":           { "maxDuration": 60 }
+    "api/account.js":          { "maxDuration": 15 }
   },
   "routes": [
     {

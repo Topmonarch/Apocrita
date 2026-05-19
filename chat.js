@@ -336,7 +336,7 @@
       var hymenAuth = window.hymAuth && window.hymAuth.currentUser;
       var userId = hymenAuth ? hymenAuth.uid : 'guest';
       var sessionId = currentChatId || '';
-      var url = '/api/usage?plan=' + encodeURIComponent(userPlan) +
+      var url = '/api/account?action=usage&plan=' + encodeURIComponent(userPlan) +
         '&userId=' + encodeURIComponent(userId) +
         '&sessionId=' + encodeURIComponent(sessionId);
       fetch(url).then(function (response) {
@@ -380,7 +380,7 @@
         if (typeof onComplete === 'function') onComplete();
         return;
       }
-      fetch('/api/plan?email=' + encodeURIComponent(user))
+      fetch('/api/account?action=plan&email=' + encodeURIComponent(user))
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
           if (data && data.plan) {
@@ -1136,7 +1136,7 @@
           vrPayload.referenceFidelity = referenceFidelity;
         }
 
-        var vrResponse = await fetch('/api/video-route', {
+        var vrResponse = await fetch('/api/video?action=render', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(vrPayload)

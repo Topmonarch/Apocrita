@@ -234,7 +234,7 @@ function loadBillingData() {
 }
 
 function _fetchAndDisplayPlan(email) {
-  fetch('/api/plan?email=' + encodeURIComponent(email))
+  fetch('/api/account?action=plan&email=' + encodeURIComponent(email))
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (data) {
       if (!data) return;
@@ -580,7 +580,7 @@ function checkVerificationState() {
 // This is the canonical way to refresh plan state — never trust client claims.
 function refreshPlanFromServer(email) {
   if (!email || email === 'guest') return;
-  fetch('/api/plan?email=' + encodeURIComponent(email))
+  fetch('/api/account?action=plan&email=' + encodeURIComponent(email))
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (data) {
       if (!data || !data.plan) return;
