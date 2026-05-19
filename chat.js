@@ -1903,10 +1903,10 @@
     var voiceBtn = document.getElementById('voice-btn');
     if (!voiceBtn) return;
     if (active) {
-      voiceBtn.textContent = '🎤 Listening...';
+      voiceBtn.innerHTML = '<img src="public/icons/Speech.png" class="toolbar-icon" alt="Voice input" /><span class="voice-listening-label">Listening...</span>';
       voiceBtn.classList.add('listening');
     } else {
-      voiceBtn.textContent = '🎤';
+      voiceBtn.innerHTML = '<img src="public/icons/Speech.png" class="toolbar-icon" alt="Voice input" />';
       voiceBtn.classList.remove('listening');
     }
   }

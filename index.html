@@ -983,8 +983,34 @@
       display: none;
     }
 
+    .toolbar-icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .voice-listening-label {
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      margin-left: 4px;
+    }
+
     /* Voice button: visible on all devices */
+    #voice-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     #voice-btn.listening {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       background: linear-gradient(180deg, #e53935, #b71c1c);
       box-shadow:
         0 6px 18px rgba(0,0,0,0.4),
@@ -1300,7 +1326,7 @@
           <input type="file" id="imageInput" accept="image/*" style="display:none;" />
           <button id="file-upload-button" class="send-btn" onclick="document.getElementById('file-upload').click()" title="Upload file">📎</button>
           <button id="camera-btn" class="send-btn" title="Upload image">📷</button>
-          <button id="voice-btn" class="send-btn" title="Voice input">🎤</button>
+          <button id="voice-btn" class="send-btn" title="Voice input"><img src="public/icons/Speech.png" class="toolbar-icon" alt="Voice input" /></button>
           <!-- send button text is white, glow remains blue -->
           <button class="send-btn glow" onclick="sendMessage()" title="Send">
             <img src="public/icons/OE Send.png" class="send-icon" alt="" aria-hidden="true" />
