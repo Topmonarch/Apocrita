@@ -741,9 +741,9 @@
     setTimeout(function () {
       clearChatUI();
       chatMessages.forEach(function (msg) {
-        // Pass the full message object so addMessage can render image thumbnails
-        // if this is a user message that has a stored .images array.
-        if (msg.role === 'user' && msg.images && msg.images.length > 0) {
+        // Pass full object for structured messages so addMessage can reconstruct
+        // image bubbles and user thumbnail rows from stored data.
+        if (msg.type === 'generated-image' || (msg.role === 'user' && msg.images && msg.images.length > 0)) {
           addMessage(msg.role, msg);
         } else {
           addMessage(msg.role, msg.content);
@@ -878,16 +878,76 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
+  // Build and return a fully-formed image result bubble (image + download + recreate).
+  // Used both immediately after generation and when replaying history.
+  function buildImageBubble(imageSrc, prompt, revisedPrompt) {
+    var bubble = document.createElement('div');
+    bubble.className = 'message assistant';
+
+    var imgEl = document.createElement('img');
+    imgEl.src = imageSrc;
+    imgEl.alt = 'Generated image';
+    imgEl.style.cssText = 'max-width:100%;border-radius:8px;display:block;margin-bottom:8px;';
+    bubble.appendChild(imgEl);
+
+    if (revisedPrompt && revisedPrompt !== prompt) {
+      var captionEl = document.createElement('div');
+      captionEl.style.cssText = 'font-size:11px;color:#888;margin-bottom:8px;';
+      captionEl.textContent = 'Prompt: ' + revisedPrompt;
+      bubble.appendChild(captionEl);
+    }
+
+    var btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+
+    var dlBtn = document.createElement('a');
+    dlBtn.href = imageSrc;
+    dlBtn.download = 'hymenoptera-image.png';
+    dlBtn.target = '_blank';
+    dlBtn.rel = 'noopener noreferrer';
+    dlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download';
+    dlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
+    btnRow.appendChild(dlBtn);
+
+    var recreateBtn = document.createElement('button');
+    recreateBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
+    recreateBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
+    (function (p) {
+      recreateBtn.addEventListener('click', function () {
+        if (messageInput) messageInput.value = p;
+        sendMessage();
+      });
+    }(prompt));
+    btnRow.appendChild(recreateBtn);
+    bubble.appendChild(btnRow);
+
+    var copyPrompt = revisedPrompt || prompt;
+    bubble.appendChild(makeCopyBtn(function () { return copyPrompt; }));
+
+    return bubble;
+  }
+
   function addMessage(type, text) {
     if (!messagesEl) return;
     hideEmptyState();
-    // Handle structured messages with images (from reloaded history)
+
+    // Structured generated-image message — rebuild the full image bubble
+    if (type === 'assistant' && text && typeof text === 'object' && text.type === 'generated-image') {
+      var imgBubble = buildImageBubble(text.imageSrc, text.prompt, text.revisedPrompt);
+      messagesEl.appendChild(imgBubble);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      if (messageInput) messageInput.focus();
+      return;
+    }
+
+    // Structured user message with image thumbnails (from reloaded history)
     if (type === 'user' && text && typeof text === 'object' && text.content) {
       var imgs = text.images || null;
       var textContent = (text.content || '').replace(/\n?\uD83D\uDDBC\uFE0F\s*\d*\s*image[s]?\s*attached\s*$/i, '').trim();
       renderUserBubbleWithImages(textContent, imgs);
       return;
     }
+
     var div = document.createElement('div');
     div.className = 'message ' + type;
     var textSpan = document.createElement('span');
@@ -1278,53 +1338,41 @@
           assistantText = errMsg;
         } else {
           var imgData = await imgResponse.json();
-          var imageSrc = "data:image/png;base64," + imgData.image;
+          var imageSrc = 'data:image/png;base64,' + imgData.image;
+          var revisedPrompt = imgData.revisedPrompt || null;
           if (typingIndicator) typingIndicator.remove();
-          // Build an image bubble with download and regenerate controls
-          var imgBubble = document.createElement('div');
-          imgBubble.className = 'message assistant';
-          var imgEl = document.createElement('img');
-          imgEl.src = imageSrc;
-          imgEl.alt = 'Generated image';
-          imgEl.style.cssText = 'max-width:100%;border-radius:8px;display:block;margin-bottom:8px;';
-          imgBubble.appendChild(imgEl);
-          if (imgData.revisedPrompt && imgData.revisedPrompt !== message) {
-            var captionEl = document.createElement('div');
-            captionEl.style.cssText = 'font-size:11px;color:#888;margin-bottom:8px;';
-            captionEl.textContent = 'Prompt: ' + imgData.revisedPrompt;
-            imgBubble.appendChild(captionEl);
-          }
-          var btnRow = document.createElement('div');
-          btnRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
-          var dlBtn = document.createElement('a');
-          dlBtn.href = imageSrc;
-          dlBtn.download = 'hymenoptera-image.png';
-          dlBtn.target = '_blank';
-          dlBtn.rel = 'noopener noreferrer';
-          dlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download';
-          dlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
-          btnRow.appendChild(dlBtn);
-          var regenBtn = document.createElement('button');
-          regenBtn.innerHTML = '<img src="public/icons/Redo.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Recreate';
-          regenBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;background:none;border:1px solid #2D8CFF;border-radius:4px;padding:4px 10px;display:inline-flex;align-items:center;';
-          regenBtn.addEventListener('click', function () {
-            if (messageInput) messageInput.value = message;
-            sendMessage();
-          });
-          btnRow.appendChild(regenBtn);
-          imgBubble.appendChild(btnRow);
+
+          // Build the image bubble via the shared helper so it is identical to
+          // what gets reconstructed when the message is replayed from history.
+          var imgBubble = buildImageBubble(imageSrc, message, revisedPrompt);
           if (messagesEl) {
             messagesEl.appendChild(imgBubble);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           }
-          assistantText = '[Image generated] ' + (imgData.revisedPrompt || message);
           assistantBubble = imgBubble;
-          var imgPromptText = imgData.revisedPrompt || message;
-          imgBubble.appendChild(makeCopyBtn(function () { return imgPromptText; }));
+
+          // Persist the structured message so the image survives reloads.
+          var imgHistoryMsg = {
+            role: 'assistant',
+            type: 'generated-image',
+            imageSrc: imageSrc,
+            prompt: message,
+            revisedPrompt: revisedPrompt || null,
+            content: '[Image created] ' + (revisedPrompt || message)
+          };
+          assistantText = imgHistoryMsg.content;
+
           // Increment image counter on successful generation
           imagesToday++;
           localStorage.setItem('imagesToday', imagesToday);
           updateImageCounter();
+
+          conversations[currentChatId].messages.push(imgHistoryMsg);
+          saveMessageToHistory(imgHistoryMsg);
+          saveConversations();
+          setStatus('Ready');
+          if (messageInput) messageInput.focus();
+          return;
         }
         conversations[currentChatId].messages.push({ role: 'assistant', content: assistantText });
         saveMessageToHistory({ role: 'assistant', content: assistantText });
