@@ -1768,13 +1768,7 @@
     return /Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent);
   }
 
-  // Show camera button only on mobile devices; voice button is always visible via CSS
-  if (isMobileDevice()) {
-    var camBtnEl = document.getElementById('camera-btn');
-    if (camBtnEl) camBtnEl.style.display = 'inline-block';
-  }
-
-  // Camera / image input: open file picker for images (native camera on mobile), add to pending tray
+  // Camera / image input: file picker on desktop, native camera on mobile
   var cameraBtn = document.getElementById('camera-btn');
   if (cameraBtn) {
     cameraBtn.addEventListener('click', function () {
@@ -1782,9 +1776,11 @@
       input.type = 'file';
       input.accept = 'image/*';
       if (isMobileDevice()) {
-        // 'environment' opens the rear-facing camera on mobile devices
+        // Opens the rear-facing camera on phones/tablets
         input.capture = 'environment';
       }
+      // On desktop: no capture attribute — opens the standard file picker
+      // so users can browse screenshots and image files from disk
       input.onchange = function (event) {
         var file = event.target.files[0];
         if (!file) return;
