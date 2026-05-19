@@ -1117,8 +1117,8 @@
             vrDlBtn.download = 'hymenoptera-video-' + Date.now() + '.mp4';
             vrDlBtn.target = '_blank';
             vrDlBtn.rel = 'noopener noreferrer';
-            vrDlBtn.textContent = '\u2B07 Download Video';
-            vrDlBtn.style.cssText = 'font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;';
+            vrDlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download Video';
+            vrDlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
             vrBtnRow.appendChild(vrDlBtn);
 
             var vrRegenBtn = document.createElement('button');
@@ -1301,8 +1301,8 @@
           dlBtn.download = 'hymenoptera-image.png';
           dlBtn.target = '_blank';
           dlBtn.rel = 'noopener noreferrer';
-          dlBtn.textContent = '⬇ Download';
-          dlBtn.style.cssText = 'font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;';
+          dlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download';
+          dlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
           btnRow.appendChild(dlBtn);
           var regenBtn = document.createElement('button');
           regenBtn.textContent = '🔄 Regenerate';
@@ -1411,8 +1411,8 @@
             vidDlBtn.download = 'hymenoptera-video-' + Date.now() + '.mp4';
             vidDlBtn.target = '_blank';
             vidDlBtn.rel = 'noopener noreferrer';
-            vidDlBtn.textContent = '\u2B07 Download Video';
-            vidDlBtn.style.cssText = 'font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;';
+            vidDlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download Video';
+            vidDlBtn.style.cssText = 'font-family:Tahoma,Arial,sans-serif;font-size:12px;color:#2D8CFF;cursor:pointer;text-decoration:none;padding:4px 10px;border:1px solid #2D8CFF;border-radius:4px;display:inline-flex;align-items:center;';
             vidBtnRow.appendChild(vidDlBtn);
 
             var vidRegenBtn = document.createElement('button');
