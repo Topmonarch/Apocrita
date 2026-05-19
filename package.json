@@ -1,16 +1,12 @@
 {
   "name": "hymenoptera",
   "version": "1.0.0",
-  "private": true,
-  "description": "Hymenoptera AI Platform",
-  "engines": {
-    "node": ">=18"
+  "description": "Hymenoptera - Windows XP themed chat interface",
+  "scripts": {
+    "build": "echo 'Static site - no build required'",
+    "start": "npx http-server"
   },
-  "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "form-data": "^4.0.5",
-    "nodemailer": "^7.0.11",
-    "openai": "^4.0.0",
-    "stripe": "^16.12.0"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
