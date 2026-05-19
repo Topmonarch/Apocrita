@@ -800,15 +800,15 @@
     var btn = document.createElement('button');
     btn.className = 'msg-copy-btn';
     btn.title = 'Copy message';
-    btn.textContent = '📋';
+    btn.innerHTML = '<img src="public/icons/Copy.png" class="copy-icon" alt="Copy" />';
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       var text = getTextFn();
       var doFeedback = function () {
-        btn.textContent = '✓';
+        btn.innerHTML = '<span class="copy-feedback">&#10003;</span>';
         btn.classList.add('copied');
         setTimeout(function () {
-          btn.textContent = '📋';
+          btn.innerHTML = '<img src="public/icons/Copy.png" class="copy-icon" alt="Copy" />';
           btn.classList.remove('copied');
         }, 1500);
       };
