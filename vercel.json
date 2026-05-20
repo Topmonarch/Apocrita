@@ -4,18 +4,19 @@
   "buildCommand": "npm install",
   "outputDirectory": ".",
   "installCommand": "npm install",
-  "functions": {
-    "api/chat.js":             { "maxDuration": 60 },
-    "api/generate-image.js":   { "maxDuration": 120 },
-    "api/video.js":            { "maxDuration": 120 },
-    "api/upload-file.js":      { "maxDuration": 30 },
-    "api/stripe-webhook.js":   { "maxDuration": 30 },
-    "api/send-verification.js":{ "maxDuration": 30 },
-    "api/verify-email.js":     { "maxDuration": 15 },
-    "api/create-checkout.js":  { "maxDuration": 15 },
-    "api/billing-portal.js":   { "maxDuration": 15 },
-    "api/account.js":          { "maxDuration": 15 }
-  },
+  "builds": [
+    { "src": "api/account.js",           "use": "@vercel/node" },
+    { "src": "api/billing-portal.js",    "use": "@vercel/node" },
+    { "src": "api/chat.js",              "use": "@vercel/node" },
+    { "src": "api/create-checkout.js",   "use": "@vercel/node" },
+    { "src": "api/generate-image.js",    "use": "@vercel/node" },
+    { "src": "api/send-verification.js", "use": "@vercel/node" },
+    { "src": "api/stripe-webhook.js",    "use": "@vercel/node" },
+    { "src": "api/upload-file.js",       "use": "@vercel/node" },
+    { "src": "api/verify-email.js",      "use": "@vercel/node" },
+    { "src": "api/video.js",             "use": "@vercel/node" },
+    { "src": "index.html",               "use": "@vercel/static" }
+  ],
   "routes": [
     {
       "src": "/api/stripe-webhook",
@@ -23,11 +24,43 @@
       "methods": ["POST"]
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
+      "src": "/api/account",
+      "dest": "/api/account.js"
     },
     {
-      "src": "/(.*\\.(js|css|png|ico|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot|html))",
+      "src": "/api/billing-portal",
+      "dest": "/api/billing-portal.js"
+    },
+    {
+      "src": "/api/chat",
+      "dest": "/api/chat.js"
+    },
+    {
+      "src": "/api/create-checkout",
+      "dest": "/api/create-checkout.js"
+    },
+    {
+      "src": "/api/generate-image",
+      "dest": "/api/generate-image.js"
+    },
+    {
+      "src": "/api/send-verification",
+      "dest": "/api/send-verification.js"
+    },
+    {
+      "src": "/api/upload-file",
+      "dest": "/api/upload-file.js"
+    },
+    {
+      "src": "/api/verify-email",
+      "dest": "/api/verify-email.js"
+    },
+    {
+      "src": "/api/video",
+      "dest": "/api/video.js"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|ico|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },
     {

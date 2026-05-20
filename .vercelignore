@@ -1,7 +1,15 @@
-# Local development server files — not needed in Vercel serverless environment
+# Server-side helpers (not serverless functions — bundled into api/ at build time)
+server/
 server/queue.js
 server/worker.js
-server/
+
+# Legacy API files that were consolidated — excluded to prevent exceeding
+# the Vercel Hobby 12-function limit if they still exist in the repository
+api/plan.js
+api/usage.js
+api/gemini.js
+api/video-route.js
+api/generate-video.js
 
 # Development and environment files
 .env
@@ -30,5 +38,5 @@ __tests__/
 .git/
 .gitignore
 
-# README (not needed in deployment)
+# README
 README.md
