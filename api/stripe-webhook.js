@@ -271,14 +271,70 @@ async function handleInvoicePaymentFailed(stripe, invoice, eventId) {
     await recordBillingEvent(eventId, 'invoice.payment_failed', null, null, 'skipped', {});
     return;
   }
+
+  // Preserve the existing plan — only update billing_status to past_due.
+  // Fetching the existing plan first ensures the user retains access while
+  // they resolve the payment issue (Stripe retries before cancelling).
+  let existingPlan = null;
+  try {
+    const r = await fetch(
+      sbUrl('/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email) + '&select=plan&limit=1'),
+      { headers: sbHeaders({ 'Prefer': 'return=representation' }) }
+    );
+    const rows = await r.json();
+    if (Array.isArray(rows) && rows.length > 0 && rows[0].plan) existingPlan = rows[0].plan;
+  } catch (e) { /* non-fatal */ }
+
   await upsertSubscription(email, {
-    plan:           'starter',
+    plan:           existingPlan || 'starter',
     billingStatus:  'past_due',
     customerId:     typeof invoice.customer === 'string' ? invoice.customer : null,
     subscriptionId: typeof invoice.subscription === 'string' ? invoice.subscription : null
   });
-  await recordBillingEvent(eventId, 'invoice.payment_failed', email, null, 'processed', { invoice_id: invoice.id });
-  console.log('stripe-webhook: invoice.payment_failed — marked past_due for', email);
+  await recordBillingEvent(eventId, 'invoice.payment_failed', email, existingPlan, 'processed', { invoice_id: invoice.id });
+  console.log('stripe-webhook: invoice.payment_failed — marked past_due for', email, '(plan preserved:', existingPlan + ')');
+}
+
+async function handleInvoicePaymentSucceeded(stripe, invoice, eventId) {
+  // Only handle subscription invoices (not one-off charges)
+  if (!invoice.subscription) {
+    await recordBillingEvent(eventId, 'invoice.payment_succeeded', null, null, 'skipped', { reason: 'no_subscription' });
+    return;
+  }
+
+  const email = await resolveCustomerEmail(stripe, invoice);
+  if (!email) {
+    await recordBillingEvent(eventId, 'invoice.payment_succeeded', null, null, 'skipped', {});
+    return;
+  }
+
+  // Resolve plan from the subscription attached to this invoice
+  let plan = null;
+  let currentPeriodEnd = null;
+  try {
+    const sub = await stripe.subscriptions.retrieve(
+      typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription.id
+    );
+    plan = await resolvePlanFromSubscription(stripe, sub);
+    if (sub.current_period_end) currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+  } catch (e) {
+    console.warn('stripe-webhook: payment_succeeded — subscription retrieve failed:', e.message);
+  }
+
+  if (!plan) {
+    await recordBillingEvent(eventId, 'invoice.payment_succeeded', email, null, 'skipped', { reason: 'plan_not_resolved' });
+    return;
+  }
+
+  await upsertSubscription(email, {
+    plan,
+    billingStatus:   'active',
+    customerId:      typeof invoice.customer === 'string' ? invoice.customer : null,
+    subscriptionId:  typeof invoice.subscription === 'string' ? invoice.subscription : null,
+    currentPeriodEnd
+  });
+  await recordBillingEvent(eventId, 'invoice.payment_succeeded', email, plan, 'processed', { invoice_id: invoice.id });
+  console.log('stripe-webhook: invoice.payment_succeeded — restored active', plan, 'for', email);
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────────
@@ -343,6 +399,8 @@ module.exports = async function handler(req, res) {
       await handleSubscriptionDeleted(stripe, dataObj, eventId);
     } else if (eventType === 'invoice.payment_failed') {
       await handleInvoicePaymentFailed(stripe, dataObj, eventId);
+    } else if (eventType === 'invoice.payment_succeeded') {
+      await handleInvoicePaymentSucceeded(stripe, dataObj, eventId);
     } else {
       console.log('stripe-webhook: ignoring event type', eventType);
       await recordBillingEvent(eventId, eventType, null, null, 'skipped', null);

@@ -173,10 +173,123 @@ async function handleUsage(params, res) {
   }
 }
 
+// ── Account deletion ──────────────────────────────────────────────────────────
+
+async function handleDelete(params, res) {
+  const { email, accessToken } = params;
+  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Valid email required.' });
+  }
+  if (!accessToken || typeof accessToken !== 'string') {
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    return res.status(500).json({ error: 'Server configuration error.' });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // 1. Verify the access token is valid by fetching the user from Supabase Auth
+  let userId = null;
+  try {
+    const userRes = await fetch(supabaseUrl + '/auth/v1/user', {
+      headers: {
+        'apikey':        serviceKey,
+        'Authorization': 'Bearer ' + accessToken
+      }
+    });
+    if (!userRes.ok) return res.status(401).json({ error: 'Invalid or expired session. Please sign in again.' });
+    const userData = await userRes.json();
+    if (!userData.id) return res.status(401).json({ error: 'Could not verify identity.' });
+    // Ensure the token belongs to the email being deleted
+    if ((userData.email || '').toLowerCase() !== normalizedEmail) {
+      return res.status(403).json({ error: 'Token does not match the requested email.' });
+    }
+    userId = userData.id;
+  } catch (e) {
+    console.error('api/account[delete]: auth verify failed:', e.message);
+    return res.status(500).json({ error: 'Could not verify identity.' });
+  }
+
+  const sbHeaders = {
+    'Content-Type':  'application/json',
+    'apikey':        serviceKey,
+    'Authorization': 'Bearer ' + serviceKey
+  };
+
+  // 2. Cancel active Stripe subscription (best-effort — don't block deletion)
+  try {
+    const subRes = await fetch(
+      supabaseUrl + '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(normalizedEmail) +
+      '&select=stripe_customer_id,stripe_subscription_id,billing_status&limit=1',
+      { headers: Object.assign({ 'Prefer': 'return=representation' }, sbHeaders) }
+    );
+    if (subRes.ok) {
+      const rows = await subRes.json();
+      const row  = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
+      if (row && row.stripe_subscription_id && row.billing_status === 'active') {
+        const stripeKey = process.env.STRIPE_SECRET_KEY;
+        if (stripeKey) {
+          try {
+            const Stripe = require('stripe');
+            const stripe = Stripe(stripeKey, { apiVersion: '2024-06-20' });
+            await stripe.subscriptions.cancel(row.stripe_subscription_id);
+            console.log('api/account[delete]: cancelled Stripe subscription', row.stripe_subscription_id);
+          } catch (stripeErr) {
+            console.warn('api/account[delete]: Stripe cancel failed (non-fatal):', stripeErr.message);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('api/account[delete]: subscription lookup failed (non-fatal):', e.message);
+  }
+
+  // 3. Delete from Supabase tables (subscriptions, profiles, verification_tokens)
+  const deleteTables = [
+    '/rest/v1/subscriptions?email=eq.'            + encodeURIComponent(normalizedEmail),
+    '/rest/v1/profiles?email=eq.'                 + encodeURIComponent(normalizedEmail),
+    '/rest/v1/verification_tokens?email=eq.'      + encodeURIComponent(normalizedEmail),
+    '/rest/v1/billing_events?email=eq.'           + encodeURIComponent(normalizedEmail)
+  ];
+
+  for (const path of deleteTables) {
+    try {
+      await fetch(supabaseUrl + path, {
+        method:  'DELETE',
+        headers: sbHeaders
+      });
+    } catch (e) {
+      console.warn('api/account[delete]: table delete failed for', path, ':', e.message);
+    }
+  }
+
+  // 4. Delete the Supabase Auth user (invalidates all sessions)
+  try {
+    const delRes = await fetch(supabaseUrl + '/auth/v1/admin/users/' + userId, {
+      method:  'DELETE',
+      headers: sbHeaders
+    });
+    if (!delRes.ok) {
+      const body = await delRes.text();
+      console.error('api/account[delete]: auth user delete failed:', delRes.status, body);
+      // Don't return error — data is already deleted, auth user is the last step
+    }
+  } catch (e) {
+    console.error('api/account[delete]: auth user delete threw:', e.message);
+  }
+
+  console.log('api/account[delete]: account deleted for', normalizedEmail);
+  return res.status(200).json({ ok: true });
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 module.exports = async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
     res.setHeader('Content-Type', 'application/json');
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -184,8 +297,9 @@ module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
 
   const params = req.method === 'GET' ? (req.query || {}) : (req.body || {});
-  const action = params.action || 'plan';
+  const action = params.action || (req.method === 'DELETE' ? 'delete' : 'plan');
 
-  if (action === 'usage') return handleUsage(params, res);
+  if (action === 'usage')  return handleUsage(params, res);
+  if (action === 'delete') return handleDelete(params, res);
   return handlePlan(params, res);
 };

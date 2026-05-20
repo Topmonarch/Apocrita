@@ -2534,22 +2534,25 @@
         if (planDisplayEl) planDisplayEl.textContent = 'Plan: Verifying upgrade\u2026';
         setStatus('Payment verification complete — activating upgrade\u2026');
       }
-      // Poll up to 5 times (every 2 s) until the server returns the upgraded plan
+      // Poll up to 12 times (every 2.5 s = 30 s total) until the server returns
+      // the upgraded plan. Stripe webhooks can take 5-15 s to fire in production.
       var pollCount = 0;
-      var MAX_PLAN_POLL_ATTEMPTS = 5;
-      var POLL_INTERVAL_MS       = 2000;
-      var INITIAL_POLL_DELAY_MS  = 1500;
+      var MAX_PLAN_POLL_ATTEMPTS = 12;
+      var POLL_INTERVAL_MS       = 2500;
+      var INITIAL_POLL_DELAY_MS  = 2000;
       var prevPlan  = userPlan;
       function pollPlan() {
         fetchPlanFromServer(function () {
           pollCount++;
           if (userPlan !== prevPlan) {
-            // Plan changed — stop polling
+            // Plan changed — stop polling and update UI
+            setStatus('Upgrade activated! Welcome to ' + userPlan.charAt(0).toUpperCase() + userPlan.slice(1) + '.');
             fetchUsageFromBackend();
           } else if (pollCount < MAX_PLAN_POLL_ATTEMPTS) {
             setTimeout(pollPlan, POLL_INTERVAL_MS);
           } else {
-            // Polling exhausted — still refresh usage with current plan
+            // Polling exhausted — webhook may still be in transit; refresh usage anyway
+            setStatus('');
             fetchUsageFromBackend();
           }
         });

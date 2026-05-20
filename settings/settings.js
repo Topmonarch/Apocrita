@@ -172,13 +172,50 @@ function logoutAllSessions() {
 }
 
 function deleteAccount() {
-  if (!confirm('Are you sure you want to permanently delete your account? All your data will be removed and this cannot be undone.')) return;
+  var user        = localStorage.getItem('hymenoptera_user');
+  var accessToken = localStorage.getItem('hymenoptera_token');
 
-  var user = localStorage.getItem('hymenoptera_user');
+  if (!user || user === 'guest') {
+    showSettingsMessage('security-message', 'Please sign in to delete your account.', 'error');
+    return;
+  }
 
+  if (!confirm('Are you sure you want to permanently delete your account?\n\nThis will:\n• Cancel any active subscription\n• Delete all your data\n• Sign you out immediately\n\nThis cannot be undone.')) return;
+
+  var deleteBtn = document.getElementById('delete-account-btn');
+  if (deleteBtn) { deleteBtn.disabled = true; deleteBtn.textContent = 'Deleting\u2026'; }
+  showSettingsMessage('security-message', 'Deleting account\u2026', 'success');
+
+  fetch('/api/account?action=delete', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ email: user, accessToken: accessToken || '' })
+  })
+  .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+  .then(function (result) {
+    if (!result.ok && result.data && result.data.error) {
+      showSettingsMessage('security-message', result.data.error, 'error');
+      if (deleteBtn) { deleteBtn.disabled = false; deleteBtn.textContent = 'Delete Account'; }
+      return;
+    }
+    // Clear all local state and return to login screen
+    _clearLocalAccountData(user);
+  })
+  .catch(function () {
+    // Server unreachable — still clear local state so user isn't stuck
+    _clearLocalAccountData(user);
+  });
+}
+
+function _clearLocalAccountData(user) {
   var keysToRemove = [
     'hymenoptera_user',
+    'hymenoptera_token',
+    'hymenoptera_uid',
     'hymenoptera_plan',
+    'hymenoptera_billing_status',
+    'hymenoptera_customer_id',
+    'hymenoptera_period_end',
     'hymenoptera_msg_count',
     'hymenoptera_msg_date',
     'hymenoptera_conversations',
@@ -189,17 +226,13 @@ function deleteAccount() {
     'hymenoptera_pending_token',
     'hymenoptera_last_verification_sent'
   ];
-
   if (user) {
     keysToRemove.push('hymenoptera_verified_' + user);
     keysToRemove.push('hymenoptera_profile_' + user);
     keysToRemove.push('hymenoptera_password_' + user);
     keysToRemove.push('hymenoptera_stripe_customer_' + user);
   }
-
-  keysToRemove.forEach(function(key) {
-    localStorage.removeItem(key);
-  });
+  keysToRemove.forEach(function (key) { localStorage.removeItem(key); });
 
   document.getElementById('settings-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
