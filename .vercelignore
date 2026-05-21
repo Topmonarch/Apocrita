@@ -1,8 +1,3 @@
-# Server-side helpers (not serverless functions — bundled into api/ at build time)
-server/
-server/queue.js
-server/worker.js
-
 # Legacy API files that were consolidated — excluded to prevent exceeding
 # the Vercel Hobby 12-function limit if they still exist in the repository
 api/plan.js

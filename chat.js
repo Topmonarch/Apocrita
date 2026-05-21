@@ -48,7 +48,7 @@
 
   // Keywords that trigger VIDEO_GENERATION_ROUTE regardless of the active model.
   // When any of these words appear in the prompt, the request is routed to
-  // /api/video-route instead of the image generation pipeline.
+  // /api/video?action=render instead of the image generation pipeline.
   var VIDEO_KEYWORDS = ['video', 'animate', 'animation', 'clip', 'motion', 'cinematic', 'make this move'];
 
   /**
@@ -1103,7 +1103,7 @@
 
       // ── VIDEO_GENERATION_ROUTE — keyword-based auto-routing ──────────────────
       // If the prompt contains video keywords (video, animate, animation, clip,
-      // motion, cinematic, make this move), route to /api/video-route regardless
+      // motion, cinematic, make this move), route to /api/video?action=render regardless
       // of the active model, UNLESS the model is already 'video-generator'
       // (that mode uses its own dedicated pipeline below).
       // This check runs before the image-generator mode so keyword matches in
@@ -1382,7 +1382,7 @@
         return;
       }
 
-      // Video Creator mode: route to /api/generate-video instead of /api/chat.
+      // Video Creator mode: route to /api/video?action=render instead of /api/chat.
       // REFERENCE_LOCK_VIDEO_MODE is activated automatically when reference images
       // are present, preserving the uploaded subject's identity and design.
       if (convModel === 'video-generator') {
@@ -1395,7 +1395,7 @@
         });
 
         // ── Generation routing ──────────────────────────────────────────────
-        // Route to VIDEO_GENERATION_ROUTE (/api/video-route) to return a real
+        // Route to VIDEO_GENERATION_ROUTE (/api/video?action=render) to return a real
         // video file instead of a text concept.
         console.log('[DEBUG] Prompt:', message);
         console.log('[Hymenoptera Routing] start');
@@ -1418,7 +1418,7 @@
           vidPayload.referenceFidelity = referenceFidelity;
         }
 
-        var vidResponse = await fetch('/api/video-route', {
+        var vidResponse = await fetch('/api/video?action=render', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(vidPayload)
