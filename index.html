@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
   <title>APOCRITA</title>
-  <link rel="stylesheet" href="settings/settings.css" />
+  <link rel="stylesheet" href="settings/settings.css?v=1.0.1" />
   <style>
     :root {
       --accent-color: #2D8CFF;
@@ -1897,6 +1900,20 @@
       .lt-transcript { height: 100px; }
     }
   </style>
+  <script>
+    // Cache busting: force fresh assets by adding version parameter
+    const CACHE_BUSTER = '?v=1.0.1';
+    window.addEventListener('DOMContentLoaded', function() {
+      // Update all img src attributes
+      document.querySelectorAll('img').forEach(function(img) {
+        if (img.src && !img.src.includes('v=')) {
+          if (img.src.includes('apocrita_logo_transparent.png') || img.src.includes('public/icons/')) {
+            img.src = img.src + CACHE_BUSTER;
+          }
+        }
+      });
+    });
+  </script>
 </head>
 <body>
 
@@ -2437,9 +2454,9 @@
     </div>
   </div>
 
-  <script src="auth.js"></script>
-  <script src="chat.js"></script>
-  <script src="settings/settings.js"></script>
+  <script src="auth.js?v=1.0.1"></script>
+  <script src="chat.js?v=1.0.1"></script>
+  <script src="settings/settings.js?v=1.0.1"></script>
 
   <script>
     function switchTab(tab) {
