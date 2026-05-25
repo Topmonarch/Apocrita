@@ -214,7 +214,7 @@
     'video-generator': 'Video Creator'
   };
 
-  var identityBlock = '\n\nYou are Hymenoptera, an advanced AI assistant. Your name is Hymenoptera. If a user asks who you are or asks if you are Hymenoptera, you must respond that you are Hymenoptera. You assist users with: conversations, coding, research, image generation, file analysis, business insights, and general knowledge. Always speak confidently as Hymenoptera and represent the Hymenoptera AI platform.';
+  var identityBlock = '\n\nYou are Apocrita, an advanced AI assistant. Your name is Apocrita. If a user asks who you are or asks if you are Apocrita, you must respond that you are Apocrita. You assist users with: conversations, coding, research, image generation, file analysis, business insights, and general knowledge. Always speak confidently as Apocrita and represent the Hymenoptera AI platform.';
 
   var agents = {
     general: {
@@ -246,7 +246,7 @@
 
   var NO_RESPONSE_MSG = 'No response received from server';
 
-  var WELCOME_MESSAGE = 'Hello, I\'m Hymenoptera \uD83D\uDC1D\nYour AI assistant and agent platform.\n\nYou can ask questions, generate images, analyze files, or switch to specialized agents like Coding, Research, Business, and Robotics.\n\nHow can I help today?';
+  var WELCOME_MESSAGE = 'Hello, I\'m Apocrita \uD83D\uDC1D\nYour AI assistant and agent platform.\n\nYou can ask questions, generate images, analyze files, or switch to specialized agents like Coding, Research, Business, and Robotics.\n\nHow can I help today?';
 
   function updateAgentIndicator() {
     var indicator = document.getElementById('agent-indicator');
@@ -1073,7 +1073,7 @@
     setStatus('Thinking...');
     var typingIndicator = createStreamingBubble();
     if (typingIndicator) {
-      typingIndicator.innerText = 'Hymenoptera is thinking.';
+      typingIndicator.innerText = 'Apocrita is thinking.';
       typingIndicator.classList.add('typing-indicator');
     }
     // Animate the dots: cycle through 1, 2, 3 dots every 500ms
@@ -1083,7 +1083,7 @@
       dotInterval = setInterval(function () {
         dotCount = (dotCount % 3) + 1;
         if (typingIndicator && typingIndicator.parentNode) {
-          typingIndicator.innerText = 'Hymenoptera is thinking' + '.'.repeat(dotCount);
+          typingIndicator.innerText = 'Apocrita is thinking' + '.'.repeat(dotCount);
         } else {
           clearInterval(dotInterval);
         }
@@ -2159,8 +2159,8 @@
       if (statusText) {
         statusText.textContent =
           s === 'user' ? 'Listening...' :
-          s === 'ai'   ? 'Hymenoptera is speaking...' :
-                         'Ready — click Talk to speak';
+          s === 'ai'   ? 'Apocrita is speaking...' :
+                         'Ready — click Talk to speak';;
       }
     }
 
@@ -2168,7 +2168,7 @@
       if (!transcript) return;
       var div = document.createElement('div');
       div.className = role === 'user' ? 'lt-line-user' : 'lt-line-ai';
-      div.textContent = (role === 'user' ? 'You: ' : 'Hymenoptera: ') + text;
+      div.textContent = (role === 'user' ? 'You: ' : 'Apocrita: ') + text;
       transcript.appendChild(div);
       transcript.scrollTop = transcript.scrollHeight;
     }

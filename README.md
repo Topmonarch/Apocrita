@@ -1,6 +1,6 @@
-# Hymenoptera
+# Apocrita
 
-Hymenoptera is an AI assistant platform built using modern web technologies and the OpenAI API.  
+Apocrita is an AI assistant platform built using modern web technologies and the OpenAI API.  
 The project provides a clean chat interface where users can interact with an AI assistant, either as a guest or with a registered account.
 
 ---
@@ -12,7 +12,7 @@ The project provides a clean chat interface where users can interact with an AI 
 - User authentication (Sign In / Sign Up)
 - Serverless backend using Vercel
 - Modern chat interface with a sidebar and message bubbles
-- Custom Hymenoptera branding and logo
+- Custom Apocrita branding and logo
 
 ---
 
