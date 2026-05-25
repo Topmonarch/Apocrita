@@ -1,4 +1,4 @@
-// auth.js — Hymenoptera authentication layer
+// auth.js — Apocrita authentication layer
 // Uses Supabase email/password auth with server-side email verification gate.
 
 var SUPABASE_URL  = 'https://faiudaldfqmqlpyghgol.supabase.co';

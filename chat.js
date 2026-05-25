@@ -902,7 +902,7 @@
 
     var dlBtn = document.createElement('a');
     dlBtn.href = imageSrc;
-    dlBtn.download = 'hymenoptera-image.png';
+    dlBtn.download = 'apocrita-image.png';
     dlBtn.target = '_blank';
     dlBtn.rel = 'noopener noreferrer';
     dlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download';
@@ -1174,7 +1174,7 @@
 
             var vrDlBtn = document.createElement('a');
             vrDlBtn.href = vrData.url;
-            vrDlBtn.download = 'hymenoptera-video-' + Date.now() + '.mp4';
+            vrDlBtn.download = 'apocrita-video-' + Date.now() + '.mp4';
             vrDlBtn.target = '_blank';
             vrDlBtn.rel = 'noopener noreferrer';
             vrDlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download Video';
@@ -1456,7 +1456,7 @@
 
             var vidDlBtn = document.createElement('a');
             vidDlBtn.href = vidData.url;
-            vidDlBtn.download = 'hymenoptera-video-' + Date.now() + '.mp4';
+            vidDlBtn.download = 'apocrita-video-' + Date.now() + '.mp4';
             vidDlBtn.target = '_blank';
             vidDlBtn.rel = 'noopener noreferrer';
             vidDlBtn.innerHTML = '<img src="public/icons/Open.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:4px;"> Download Video';
