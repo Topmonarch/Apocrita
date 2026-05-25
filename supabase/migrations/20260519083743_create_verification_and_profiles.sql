@@ -2,7 +2,7 @@
   # Email Verification System
 
   ## Summary
-  Sets up the full email verification infrastructure for Hymenoptera.
+  Sets up the full email verification infrastructure for Apocrita.
 
   ## New Tables
 

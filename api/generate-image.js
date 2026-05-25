@@ -85,10 +85,10 @@ module.exports = async function handler(req, res) {
 
     const hasRefImages = refImageList.length > 0 || hasReferenceImage === true;
 
-    console.log('[Hymenoptera Image] prompt_length=' + safePrompt.length);
-    console.log('[Hymenoptera Image] has_reference_images=' + hasRefImages);
-    console.log('[Hymenoptera Image] reference_image_count=' + refImageList.length);
-    console.log('[Hymenoptera Image] fidelity=' + (referenceFidelity || 'balanced'));
+    console.log('[Apocrita Image] prompt_length=' + safePrompt.length);
+    console.log('[Apocrita Image] has_reference_images=' + hasRefImages);
+    console.log('[Apocrita Image] reference_image_count=' + refImageList.length);
+    console.log('[Apocrita Image] fidelity=' + (referenceFidelity || 'balanced'));
 
     const renderStart = Date.now();
 
@@ -99,7 +99,7 @@ module.exports = async function handler(req, res) {
       // ── IMAGE EDIT MODE (reference image provided) ────────────────────────
       // Use the Images Edit endpoint which accepts an image and a prompt.
       // We use the first reference image as the source.
-      console.log('[Hymenoptera Image] mode=image_edit');
+      console.log('[Apocrita Image] mode=image_edit');
 
       const sourceDataUrl = toDataUrl(refImageList[0]);
       const sourceMime = (refImageList[0].mimeType || 'image/png').split(';')[0].trim();
@@ -149,7 +149,7 @@ module.exports = async function handler(req, res) {
         try { errData = await editRes.json(); } catch (e) { errData = null; }
         const errMsg = (errData && errData.error && errData.error.message)
           || 'OpenAI image edit failed (HTTP ' + editRes.status + ')';
-        console.error('[Hymenoptera Image] edit_error=' + errMsg);
+        console.error('[Apocrita Image] edit_error=' + errMsg);
         res.setHeader('Content-Type', 'application/json');
         return res.status(502).json({ error: { message: errMsg } });
       }
@@ -157,7 +157,7 @@ module.exports = async function handler(req, res) {
       const editData = await editRes.json();
       const item = editData.data && editData.data[0];
       if (!item) {
-        console.error('[Hymenoptera Image] edit_response_empty:', JSON.stringify(editData));
+        console.error('[Apocrita Image] edit_response_empty:', JSON.stringify(editData));
         res.setHeader('Content-Type', 'application/json');
         return res.status(502).json({ error: { message: 'OpenAI returned an empty image edit response' } });
       }
@@ -175,7 +175,7 @@ module.exports = async function handler(req, res) {
 
     } else {
       // ── TEXT-TO-IMAGE MODE ────────────────────────────────────────────────
-      console.log('[Hymenoptera Image] mode=text_to_image');
+      console.log('[Apocrita Image] mode=text_to_image');
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -205,7 +205,7 @@ module.exports = async function handler(req, res) {
         try { errData = await genRes.json(); } catch (e) { errData = null; }
         const errMsg = (errData && errData.error && errData.error.message)
           || 'OpenAI image generation failed (HTTP ' + genRes.status + ')';
-        console.error('[Hymenoptera Image] generation_error=' + errMsg);
+        console.error('[Apocrita Image] generation_error=' + errMsg);
         res.setHeader('Content-Type', 'application/json');
         return res.status(502).json({ error: { message: errMsg } });
       }
@@ -213,7 +213,7 @@ module.exports = async function handler(req, res) {
       const genData = await genRes.json();
       const item = genData.data && genData.data[0];
       if (!item) {
-        console.error('[Hymenoptera Image] generation_response_empty:', JSON.stringify(genData));
+        console.error('[Apocrita Image] generation_response_empty:', JSON.stringify(genData));
         res.setHeader('Content-Type', 'application/json');
         return res.status(502).json({ error: { message: 'OpenAI returned an empty image generation response' } });
       }
@@ -229,13 +229,13 @@ module.exports = async function handler(req, res) {
     }
 
     if (!imageBase64) {
-      console.error('[Hymenoptera Image] no_image_data_in_response');
+      console.error('[Apocrita Image] no_image_data_in_response');
       res.setHeader('Content-Type', 'application/json');
       return res.status(502).json({ error: { message: 'No image data returned by OpenAI' } });
     }
 
     const renderTimeSec = ((Date.now() - renderStart) / 1000).toFixed(1);
-    console.log('[Hymenoptera Image] render_time=' + renderTimeSec + 's');
+    console.log('[Apocrita Image] render_time=' + renderTimeSec + 's');
 
     res.setHeader('Content-Type', 'application/json');
     const responseBody = { image: imageBase64 };
@@ -244,11 +244,11 @@ module.exports = async function handler(req, res) {
 
   } catch (err) {
     if (err.name === 'AbortError') {
-      console.error('[Hymenoptera Image] request_timed_out after ' + (REQUEST_TIMEOUT_MS / 1000) + 's');
+      console.error('[Apocrita Image] request_timed_out after ' + (REQUEST_TIMEOUT_MS / 1000) + 's');
       res.setHeader('Content-Type', 'application/json');
       return res.status(504).json({ error: { message: 'Image generation timed out. Please try again.' } });
     }
-    console.error('[Hymenoptera Image] unhandled_error:', err);
+    console.error('[Apocrita Image] unhandled_error:', err);
     if (!res.headersSent) {
       res.setHeader('Content-Type', 'application/json');
       return res.status(500).json({ error: { message: err.message || 'Internal server error' } });

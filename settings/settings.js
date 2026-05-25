@@ -1,5 +1,5 @@
 // ===== SETTINGS MODULE =====
-// Hymenoptera Settings - Profile, Preferences, Security, Billing
+// Apocrita Settings - Profile, Preferences, Security, Billing
 
 var currentView = 'chat';
 
@@ -44,8 +44,8 @@ function loadSettingsData() {
 // ===== PROFILE =====
 
 function loadProfileData() {
-  var user = localStorage.getItem('hymenoptera_user') || '';
-  var profileKey = 'hymenoptera_profile_' + user;
+  var user = localStorage.getItem('Apocrita_user') || '';
+  var profileKey = 'Apocrita_profile_' + user;
   var profile = {};
   try {
     profile = JSON.parse(localStorage.getItem(profileKey) || '{}');
@@ -65,7 +65,7 @@ function loadProfileData() {
 }
 
 function saveProfile() {
-  var user = localStorage.getItem('hymenoptera_user');
+  var user = localStorage.getItem('Apocrita_user');
   if (!user || user === 'guest') {
     showSettingsMessage('profile-message', 'Please sign in to save profile data.', 'error');
     return;
@@ -76,7 +76,7 @@ function saveProfile() {
   var language = document.getElementById('profile-language').value;
   var dob = document.getElementById('profile-dob').value;
 
-  var profileKey = 'hymenoptera_profile_' + user;
+  var profileKey = 'Apocrita_profile_' + user;
   localStorage.setItem(profileKey, JSON.stringify({
     name: name,
     country: country,
@@ -98,7 +98,7 @@ var prefDefaults = {
 function loadPreferencesData() {
   var stored = {};
   try {
-    stored = JSON.parse(localStorage.getItem('hymenoptera_preferences') || '{}');
+    stored = JSON.parse(localStorage.getItem('Apocrita_preferences') || '{}');
   } catch(e) {}
 
   var prefs = Object.assign({}, prefDefaults, stored);
@@ -123,14 +123,14 @@ function savePreferences() {
     soundNotifications: soundEl ? soundEl.checked : false
   };
 
-  localStorage.setItem('hymenoptera_preferences', JSON.stringify(prefs));
+  localStorage.setItem('Apocrita_preferences', JSON.stringify(prefs));
   showSettingsMessage('preferences-message', 'Preferences saved.', 'success');
 }
 
 // ===== SECURITY =====
 
 function changePassword() {
-  var user = localStorage.getItem('hymenoptera_user');
+  var user = localStorage.getItem('Apocrita_user');
   if (!user || user === 'guest') {
     showSettingsMessage('security-message', 'Please sign in to change your password.', 'error');
     return;
@@ -155,7 +155,7 @@ function changePassword() {
     return;
   }
 
-  localStorage.setItem('hymenoptera_password_' + user, newPass);
+  localStorage.setItem('Apocrita_password_' + user, newPass);
 
   document.getElementById('current-password').value = '';
   document.getElementById('new-password').value = '';
@@ -172,8 +172,8 @@ function logoutAllSessions() {
 }
 
 function deleteAccount() {
-  var user        = localStorage.getItem('hymenoptera_user');
-  var accessToken = localStorage.getItem('hymenoptera_token');
+  var user        = localStorage.getItem('Apocrita_user');
+  var accessToken = localStorage.getItem('Apocrita_token');
 
   if (!user || user === 'guest') {
     showSettingsMessage('security-message', 'Please sign in to delete your account.', 'error');
@@ -209,28 +209,28 @@ function deleteAccount() {
 
 function _clearLocalAccountData(user) {
   var keysToRemove = [
-    'hymenoptera_user',
-    'hymenoptera_token',
-    'hymenoptera_uid',
-    'hymenoptera_plan',
-    'hymenoptera_billing_status',
-    'hymenoptera_customer_id',
-    'hymenoptera_period_end',
-    'hymenoptera_msg_count',
-    'hymenoptera_msg_date',
-    'hymenoptera_conversations',
-    'hymenoptera_projects',
-    'hymenoptera_preferences',
-    'hymenoptera_needs_verification',
-    'hymenoptera_pending_email',
-    'hymenoptera_pending_token',
-    'hymenoptera_last_verification_sent'
+    'Apocrita_user',
+    'Apocrita_token',
+    'Apocrita_uid',
+    'Apocrita_plan',
+    'Apocrita_billing_status',
+    'Apocrita_customer_id',
+    'Apocrita_period_end',
+    'Apocrita_msg_count',
+    'Apocrita_msg_date',
+    'Apocrita_conversations',
+    'Apocrita_projects',
+    'Apocrita_preferences',
+    'Apocrita_needs_verification',
+    'Apocrita_pending_email',
+    'Apocrita_pending_token',
+    'Apocrita_last_verification_sent'
   ];
   if (user) {
-    keysToRemove.push('hymenoptera_verified_' + user);
-    keysToRemove.push('hymenoptera_profile_' + user);
-    keysToRemove.push('hymenoptera_password_' + user);
-    keysToRemove.push('hymenoptera_stripe_customer_' + user);
+    keysToRemove.push('Apocrita_verified_' + user);
+    keysToRemove.push('Apocrita_profile_' + user);
+    keysToRemove.push('Apocrita_password_' + user);
+    keysToRemove.push('Apocrita_stripe_customer_' + user);
   }
   keysToRemove.forEach(function (key) { localStorage.removeItem(key); });
 
@@ -257,7 +257,7 @@ var planStatusLabels = {
 };
 
 function loadBillingData() {
-  var user = localStorage.getItem('hymenoptera_user');
+  var user = localStorage.getItem('Apocrita_user');
   // Always re-fetch from server so plan reflects server state, not localStorage
   if (user && user !== 'guest') {
     _fetchAndDisplayPlan(user);
@@ -272,14 +272,14 @@ function _fetchAndDisplayPlan(email) {
     .then(function (data) {
       if (!data) return;
       // Update localStorage so the rest of the app (usage limits etc.) stays in sync
-      localStorage.setItem('hymenoptera_plan', data.plan || 'starter');
+      localStorage.setItem('Apocrita_plan', data.plan || 'starter');
       if (data.customerId) {
-        localStorage.setItem('hymenoptera_stripe_customer_' + email, data.customerId);
+        localStorage.setItem('Apocrita_stripe_customer_' + email, data.customerId);
       }
       _applyPlanToUI(data.plan, data.billingStatus, data.customerId, data.currentPeriodEnd);
     })
     .catch(function () {
-      var cached = localStorage.getItem('hymenoptera_plan') || 'starter';
+      var cached = localStorage.getItem('Apocrita_plan') || 'starter';
       _applyPlanToUI(cached, 'inactive', null, null);
     });
 }
@@ -324,7 +324,7 @@ function _applyPlanToUI(plan, billingStatus, customerId, currentPeriodEnd) {
 }
 
 function openBillingPortal() {
-  var user = localStorage.getItem('hymenoptera_user');
+  var user = localStorage.getItem('Apocrita_user');
   if (!user || user === 'guest') {
     showSettingsMessage('billing-message', 'Please sign in to manage billing.', 'error');
     return;
@@ -461,9 +461,9 @@ function createAccountWithVerification() {
 
     // Step 2: Generate and send verification token
     var token = _generateVerificationToken();
-    localStorage.setItem('hymenoptera_pending_email', email);
-    localStorage.setItem('hymenoptera_pending_token', token);
-    localStorage.setItem('hymenoptera_needs_verification', 'true');
+    localStorage.setItem('Apocrita_pending_email', email);
+    localStorage.setItem('Apocrita_pending_token', token);
+    localStorage.setItem('Apocrita_needs_verification', 'true');
 
     _showVerificationScreen(email);
     _setVerifMsg('Sending verification email\u2026', 'verif-pending');
@@ -472,7 +472,7 @@ function createAccountWithVerification() {
     _sendVerificationEmailRequest(email, token)
       .then(function () {
         _setVerifMsg('Verification email sent. Please check your inbox and spam folder.', 'verif-ok');
-        localStorage.setItem('hymenoptera_last_verification_sent', Date.now().toString());
+        localStorage.setItem('Apocrita_last_verification_sent', Date.now().toString());
       })
       .catch(function (err) {
         _setVerifMsg((err && err.message) || 'Could not send verification email. Please use the resend button.', 'verif-err');
@@ -485,10 +485,10 @@ function createAccountWithVerification() {
 }
 
 function cancelVerification() {
-  localStorage.removeItem('hymenoptera_needs_verification');
-  localStorage.removeItem('hymenoptera_pending_email');
-  localStorage.removeItem('hymenoptera_pending_token');
-  localStorage.removeItem('hymenoptera_last_verification_sent');
+  localStorage.removeItem('Apocrita_needs_verification');
+  localStorage.removeItem('Apocrita_pending_email');
+  localStorage.removeItem('Apocrita_pending_token');
+  localStorage.removeItem('Apocrita_last_verification_sent');
   var verifEl  = document.getElementById('verification-screen');
   var expireEl = document.getElementById('verification-expired-screen');
   var loginEl  = document.getElementById('login-screen');
@@ -498,8 +498,8 @@ function cancelVerification() {
 }
 
 function resendVerificationEmail() {
-  var email = localStorage.getItem('hymenoptera_pending_email');
-  var token = localStorage.getItem('hymenoptera_pending_token');
+  var email = localStorage.getItem('Apocrita_pending_email');
+  var token = localStorage.getItem('Apocrita_pending_token');
 
   if (!email) {
     // Try to read email from the expired screen display
@@ -513,7 +513,7 @@ function resendVerificationEmail() {
   }
 
   // Enforce 60s client-side cooldown
-  var lastSent   = parseInt(localStorage.getItem('hymenoptera_last_verification_sent') || '0', 10);
+  var lastSent   = parseInt(localStorage.getItem('Apocrita_last_verification_sent') || '0', 10);
   var elapsed    = Date.now() - lastSent;
   var cooldownMs = 60 * 1000;
   if (elapsed < cooldownMs) {
@@ -524,16 +524,16 @@ function resendVerificationEmail() {
 
   // Generate a fresh token for the resend (old one may be expired in DB)
   token = _generateVerificationToken();
-  localStorage.setItem('hymenoptera_pending_token', token);
-  localStorage.setItem('hymenoptera_pending_email', email);
-  localStorage.setItem('hymenoptera_needs_verification', 'true');
+  localStorage.setItem('Apocrita_pending_token', token);
+  localStorage.setItem('Apocrita_pending_email', email);
+  localStorage.setItem('Apocrita_needs_verification', 'true');
 
   _setVerifMsg('Sending verification email\u2026', 'verif-pending');
 
   _sendVerificationEmailRequest(email, token)
     .then(function () {
       _setVerifMsg('Verification email sent. Please check your inbox and spam folder.', 'verif-ok');
-      localStorage.setItem('hymenoptera_last_verification_sent', Date.now().toString());
+      localStorage.setItem('Apocrita_last_verification_sent', Date.now().toString());
       // If we were on the expired screen, switch back to normal verification screen
       _showVerificationScreen(email);
     })
@@ -567,14 +567,14 @@ function checkVerificationToken() {
   .then(function (result) {
     if (result.ok && result.data.ok) {
       // Success — save email, redirect to chat
-      var email = result.data.email || localStorage.getItem('hymenoptera_pending_email') || '';
-      localStorage.removeItem('hymenoptera_needs_verification');
-      localStorage.removeItem('hymenoptera_pending_token');
-      localStorage.removeItem('hymenoptera_pending_email');
-      localStorage.setItem('hymenoptera_user', email);
+      var email = result.data.email || localStorage.getItem('Apocrita_pending_email') || '';
+      localStorage.removeItem('Apocrita_needs_verification');
+      localStorage.removeItem('Apocrita_pending_token');
+      localStorage.removeItem('Apocrita_pending_email');
+      localStorage.setItem('Apocrita_user', email);
 
       // Show success flash then open chat
-      _setVerifMsg('Email verified successfully! Opening Hymenoptera\u2026', 'verif-ok');
+      _setVerifMsg('Email verified successfully! Opening Apocrita\u2026', 'verif-ok');
       setTimeout(function () {
         if (verifEl) verifEl.style.display = 'none';
         var chatEl = document.getElementById('chat-screen');
@@ -585,7 +585,7 @@ function checkVerificationToken() {
 
     } else if (result.data && result.data.expired) {
       // Token expired — show expired screen with resend option
-      var pendingEmail = localStorage.getItem('hymenoptera_pending_email') || '';
+      var pendingEmail = localStorage.getItem('Apocrita_pending_email') || '';
       _showExpiredScreen(pendingEmail);
 
     } else {
@@ -599,10 +599,10 @@ function checkVerificationToken() {
 }
 
 function checkVerificationState() {
-  var needsVerification = localStorage.getItem('hymenoptera_needs_verification');
-  var user = localStorage.getItem('hymenoptera_user');
+  var needsVerification = localStorage.getItem('Apocrita_needs_verification');
+  var user = localStorage.getItem('Apocrita_user');
   if (needsVerification === 'true' && !user) {
-    var email = localStorage.getItem('hymenoptera_pending_email') || '';
+    var email = localStorage.getItem('Apocrita_pending_email') || '';
     _showVerificationScreen(email);
   }
 }
@@ -617,14 +617,14 @@ function refreshPlanFromServer(email) {
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (data) {
       if (!data || !data.plan) return;
-      localStorage.setItem('hymenoptera_plan', data.plan);
+      localStorage.setItem('Apocrita_plan', data.plan);
       if (data.customerId) {
-        localStorage.setItem('hymenoptera_stripe_customer_' + email, data.customerId);
+        localStorage.setItem('Apocrita_stripe_customer_' + email, data.customerId);
       }
       _applyPlanToUI(data.plan, data.billingStatus, data.customerId, data.currentPeriodEnd || null);
       // Propagate to chat.js if it's loaded
       if (typeof userPlan !== 'undefined') {
-        try { window._hymenoptera_plan = data.plan; } catch (e) { /* ignore */ }
+        try { window._Apocrita_plan = data.plan; } catch (e) { /* ignore */ }
       }
     })
     .catch(function () {
@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (isPortalReturn || isUpgradeSuccess) {
     history.replaceState(null, '', window.location.pathname);
-    var user = localStorage.getItem('hymenoptera_user');
+    var user = localStorage.getItem('Apocrita_user');
     if (user) {
       openSettings();
       switchSettingsTab('billing');
@@ -652,7 +652,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // On every load, sync the plan from the server so it persists after re-login
-  var currentUser = localStorage.getItem('hymenoptera_user');
+  var currentUser = localStorage.getItem('Apocrita_user');
   if (currentUser && currentUser !== 'guest') {
     refreshPlanFromServer(currentUser);
   }

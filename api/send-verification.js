@@ -9,7 +9,7 @@
 // Required env vars:
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 //   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM_EMAIL
-//   SMTP_FROM_NAME (optional, default "Hymenoptera")
+//   SMTP_FROM_NAME (optional, default "Apocrita")
 //   PRODUCTION_URL or VERCEL_URL
 
 'use strict';
@@ -38,7 +38,7 @@ function buildVerificationUrl(req, token) {
       (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-host']
         ? req.headers['x-forwarded-proto'] + '://' + req.headers['x-forwarded-host']
         : null);
-    base = origin || 'https://hymenoptera-ai.vercel.app';
+    base = origin || 'https://Apocrita-ai.vercel.app';
   }
   return base.replace(/\/$/, '') + '/?verify=' + encodeURIComponent(token);
 }
@@ -82,7 +82,7 @@ async function sendVerificationEmail(toEmail, verifyUrl) {
   const user       = process.env.SMTP_USER;
   const pass       = process.env.SMTP_PASS;
   const fromEmail  = process.env.SMTP_FROM_EMAIL;
-  const fromName   = process.env.SMTP_FROM_NAME || 'Hymenoptera';
+  const fromName   = process.env.SMTP_FROM_NAME || 'Apocrita';
 
   if (!host || !user || !pass || !fromEmail) {
     const missing = [!host && 'SMTP_HOST', !user && 'SMTP_USER', !pass && 'SMTP_PASS', !fromEmail && 'SMTP_FROM_EMAIL'].filter(Boolean);
@@ -98,11 +98,11 @@ async function sendVerificationEmail(toEmail, verifyUrl) {
                 background:#0b0f14;color:#fff;border-radius:10px;padding:32px;
                 border:1px solid #1e2530;">
       <div style="text-align:center;margin-bottom:24px;">
-        <h1 style="color:#2D8CFF;letter-spacing:3px;font-size:22px;margin:0;">HYMENOPTERA</h1>
+        <h1 style="color:#2D8CFF;letter-spacing:3px;font-size:22px;margin:0;">Apocrita</h1>
       </div>
       <h2 style="font-size:18px;margin:0 0 16px;color:#fff;">Verify your email address</h2>
       <p style="color:#aaa;font-size:14px;line-height:1.6;margin:0 0 24px;">
-        Thank you for creating a Hymenoptera account. Click the button below to verify
+        Thank you for creating a Apocrita account. Click the button below to verify
         your email address and activate your account. This link expires in 24 hours.
       </p>
       <div style="text-align:center;margin-bottom:24px;">
@@ -123,7 +123,7 @@ async function sendVerificationEmail(toEmail, verifyUrl) {
       </p>
     </div>`;
 
-  const text = `Hymenoptera — Verify your email\n\n` +
+  const text = `Apocrita — Verify your email\n\n` +
     `Click the link below to verify your email address:\n${verifyUrl}\n\n` +
     `This link expires in 24 hours.\n\n` +
     `If you did not create this account, you can safely ignore this email.`;
@@ -131,7 +131,7 @@ async function sendVerificationEmail(toEmail, verifyUrl) {
   return transporter.sendMail({
     from: `"${fromName}" <${fromEmail}>`,
     to: toEmail,
-    subject: 'Verify your Hymenoptera account',
+    subject: 'Verify your Apocrita account',
     text, html
   });
 }

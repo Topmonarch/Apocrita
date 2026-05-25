@@ -2,14 +2,14 @@
   # Billing Tables
 
   ## Summary
-  Adds server-authoritative billing persistence so Hymenoptera plan state
+  Adds server-authoritative billing persistence so Apocrita plan state
   survives Redis outages, device changes, and re-logins — and so payment
   history is permanently auditable.
 
   ## New Tables
 
   ### `subscriptions`
-  One row per Hymenoptera user. Tracks the current plan, Stripe customer/
+  One row per Apocrita user. Tracks the current plan, Stripe customer/
   subscription IDs, and billing status. This is the SINGLE SOURCE OF TRUTH
   for whether a user has a paid plan. No client-side claim can override it.
 

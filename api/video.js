@@ -220,8 +220,8 @@ async function handleRender(body, res) {
   const refImageList = normalizeRefImages(referenceImages);
   const hasRefImages = refImageList.length > 0 || hasReferenceImage === true;
 
-  console.log('[Hymenoptera Routing] selected_route=VIDEO_GENERATION_ROUTE');
-  console.log('[Hymenoptera Video] model=' + provider + ' hasReferenceImage=' + hasRefImages);
+  console.log('[Apocrita Routing] selected_route=VIDEO_GENERATION_ROUTE');
+  console.log('[Apocrita Video] model=' + provider + ' hasReferenceImage=' + hasRefImages);
 
   const renderStart = Date.now();
   let videoUrl;
@@ -239,7 +239,7 @@ async function handleRender(body, res) {
   }
 
   const renderTimeSec = ((Date.now() - renderStart) / 1000).toFixed(1);
-  console.log('[Hymenoptera Video] render_time=' + renderTimeSec + 's url=' + videoUrl);
+  console.log('[Apocrita Video] render_time=' + renderTimeSec + 's url=' + videoUrl);
 
   res.setHeader('Content-Type', 'application/json');
   return res.status(200).json({ type: 'video', url: videoUrl, download: true });
