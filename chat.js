@@ -2,7 +2,7 @@
 // Frontend chat handler: POST to /api/chat (SSE stream), manage empty-state.
 // Maintains conversation memory in messages array.
 
-// Preserves hymAuth checks and saveMessageToHistory behavior.
+// Preserves apoAuth checks and saveMessageToHistory behavior.
 
 
 (function () {
@@ -170,7 +170,7 @@
   };
 
   // Current user plan — defaults to 'starter' for all new users
-  var userPlan = localStorage.getItem('Apocrita_plan') || 'starter';
+  var userPlan = localStorage.getItem('apocrita_plan') || 'starter';
 
   // Returns today's date as a stable YYYY-MM-DD string in the Pacific/Auckland timezone.
   // Using a fixed timezone and date-only format keeps the reset boundary consistent and
@@ -333,8 +333,8 @@
   // so the displayed counter always reflects the backend source of truth.
   function fetchUsageFromBackend() {
     try {
-      var hymenAuth = window.hymAuth && window.hymAuth.currentUser;
-      var userId = hymenAuth ? hymenAuth.uid : 'guest';
+      var apoAuth = window.apoAuth && window.apoAuth.currentUser;
+      var userId = apoAuth ? apoAuth.uid : 'guest';
       var sessionId = currentChatId || '';
       var url = '/api/account?action=usage&plan=' + encodeURIComponent(userPlan) +
         '&userId=' + encodeURIComponent(userId) +
@@ -375,7 +375,7 @@
   // the server-side source of truth without requiring a sign-out/sign-in cycle.
   function fetchPlanFromServer(onComplete) {
     try {
-      var user = localStorage.getItem('Apocrita_user');
+      var user = localStorage.getItem('apocrita_user');
       if (!user || user === 'guest') {
         if (typeof onComplete === 'function') onComplete();
         return;
@@ -388,13 +388,13 @@
             if (serverPlan !== userPlan) {
               console.log('fetchPlanFromServer: applying server plan', serverPlan, '(was', userPlan + ')');
               userPlan = serverPlan;
-              localStorage.setItem('Apocrita_plan', serverPlan);
+              localStorage.setItem('apocrita_plan', serverPlan);
               updateAllCounters();
               updatePlanDisplay();
             }
             // Persist customerId for billing-portal access
             if (data.customerId) {
-              localStorage.setItem('Apocrita_stripe_customer_' + user, data.customerId);
+              localStorage.setItem('apocrita_stripe_customer_' + user, data.customerId);
             }
           }
           if (typeof onComplete === 'function') onComplete();
@@ -468,14 +468,14 @@
 
   // Load saved conversations from localStorage
   try {
-    conversations = JSON.parse(localStorage.getItem('Apocrita_conversations')) || {};
+    conversations = JSON.parse(localStorage.getItem('apocrita_conversations')) || {};
   } catch (e) {
     conversations = {};
   }
 
   // Load saved projects from localStorage
   try {
-    projects = JSON.parse(localStorage.getItem('Apocrita_projects')) || { 'Default': { files: [] } };
+    projects = JSON.parse(localStorage.getItem('apocrita_projects')) || { 'Default': { files: [] } };
   } catch (e) {
     projects = { 'Default': { files: [] } };
   }
@@ -532,8 +532,8 @@
 
   function saveConversations() {
     try {
-      localStorage.setItem('Apocrita_conversations', JSON.stringify(conversations));
-      localStorage.setItem('Apocrita_projects', JSON.stringify(projects));
+      localStorage.setItem('apocrita_conversations', JSON.stringify(conversations));
+      localStorage.setItem('apocrita_projects', JSON.stringify(projects));
     } catch (e) {
       console.warn('saveConversations error', e);
     }
@@ -764,15 +764,15 @@
   // Save a message to local history only if allowed (logged-in, non-guest users)
   function saveMessageToHistory(msg) {
     try {
-      if (window.hymAuth) {
-        // If hymAuth is present, respect its canSaveHistory gate
-        if (!window.hymAuth.canSaveHistory || !window.hymAuth.canSaveHistory()) return;
+      if (window.apoAuth) {
+        // If apoAuth is present, respect its canSaveHistory gate
+        if (!window.apoAuth.canSaveHistory || !window.apoAuth.canSaveHistory()) return;
       } else {
         // Fallback: only save for authenticated (non-guest) users
-        var user = localStorage.getItem('Apocrita_user');
+        var user = localStorage.getItem('apocrita_user');
         if (!user || user === 'guest') return;
       }
-      var key = 'hym_messages';
+      var key = 'apo_messages';
       var raw = localStorage.getItem(key);
       var arr = raw ? JSON.parse(raw) : [];
       arr.push(msg);
@@ -1109,8 +1109,8 @@
       // This check runs before the image-generator mode so keyword matches in
       // image mode are automatically redirected to video generation.
       if (convModel !== 'video-generator' && promptContainsVideoKeywords(message)) {
-        var vrHymenAuth = window.hymAuth && window.hymAuth.currentUser;
-        var vrUserId = vrHymenAuth ? vrHymenAuth.uid : 'guest';
+        var vrApoAuth = window.apoAuth && window.apoAuth.currentUser;
+        var vrUserId = vrApoAuth ? vrApoAuth.uid : 'guest';
 
         // Build reference images from any pending attachments.
         var vrRefImages = attachmentsCopy.map(function (a) {
@@ -1223,8 +1223,8 @@
 
       // Image Generator mode: route to /api/generate-image instead of /api/chat
       if (convModel === 'image-generator') {
-        var imgHymenAuth = window.hymAuth && window.hymAuth.currentUser;
-        var imgUserId = imgHymenAuth ? imgHymenAuth.uid : 'guest';
+        var imgApoAuth = window.apoAuth && window.apoAuth.currentUser;
+        var imgUserId = imgApoAuth ? imgApoAuth.uid : 'guest';
 
         // Build reference images list from any pending attachments that were
         // captured before clearing the tray.
@@ -1386,8 +1386,8 @@
       // REFERENCE_LOCK_VIDEO_MODE is activated automatically when reference images
       // are present, preserving the uploaded subject's identity and design.
       if (convModel === 'video-generator') {
-        var vidHymenAuth = window.hymAuth && window.hymAuth.currentUser;
-        var vidUserId = vidHymenAuth ? vidHymenAuth.uid : 'guest';
+        var vidApoAuth = window.apoAuth && window.apoAuth.currentUser;
+        var vidUserId = vidApoAuth ? vidApoAuth.uid : 'guest';
 
         // Build reference images list from any pending attachments.
         var vidRefImages = attachmentsCopy.map(function (a) {
@@ -1631,7 +1631,7 @@
     if (typeof setCurrentView === 'function' && window.currentView === 'settings') {
       setCurrentView('chat');
     }
-    var user = localStorage.getItem('Apocrita_user');
+    var user = localStorage.getItem('apocrita_user');
     if (!user) return;
     currentChatId = generateChatId();
     var chatCount = Object.keys(conversations).filter(function (id) {
@@ -1743,8 +1743,8 @@
     }
 
     try {
-      var hymenAuth = window.hymAuth && window.hymAuth.currentUser;
-      var userId = hymenAuth ? hymenAuth.uid : 'guest';
+      var apoAuth = window.apoAuth && window.apoAuth.currentUser;
+      var userId = apoAuth ? apoAuth.uid : 'guest';
 
       var response = await fetch('/api/upload-file', {
         method: 'POST',
@@ -2587,7 +2587,7 @@
 
   // Server-side Stripe Checkout (no hardcoded payment links — keys stay server-side)
   function openStripeCheckout(plan) {
-    var email = localStorage.getItem('Apocrita_user');
+    var email = localStorage.getItem('apocrita_user');
     var msgEl = document.getElementById('upgrade-message');
 
     if (!email || email === 'guest') {
