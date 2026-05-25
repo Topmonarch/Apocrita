@@ -22,7 +22,7 @@ function getBaseUrl(req) {
   if (process.env.PRODUCTION_URL) return process.env.PRODUCTION_URL.replace(/\/$/, '');
   if (process.env.VERCEL_URL)     return 'https://' + process.env.VERCEL_URL.replace(/\/$/, '');
   const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
-  const host  = req.headers['x-forwarded-host'] || req.headers['host'] || 'hymenoptera-ai.vercel.app';
+  const host  = req.headers['x-forwarded-host'] || req.headers['host'] || 'Apocrita-ai.vercel.app';
   return proto + '://' + host;
 }
 

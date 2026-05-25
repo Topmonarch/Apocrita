@@ -170,7 +170,7 @@
   };
 
   // Current user plan — defaults to 'starter' for all new users
-  var userPlan = localStorage.getItem('hymenoptera_plan') || 'starter';
+  var userPlan = localStorage.getItem('Apocrita_plan') || 'starter';
 
   // Returns today's date as a stable YYYY-MM-DD string in the Pacific/Auckland timezone.
   // Using a fixed timezone and date-only format keeps the reset boundary consistent and
@@ -214,7 +214,7 @@
     'video-generator': 'Video Creator'
   };
 
-  var identityBlock = '\n\nYou are Apocrita, an advanced AI assistant. Your name is Apocrita. If a user asks who you are or asks if you are Apocrita, you must respond that you are Apocrita. You assist users with: conversations, coding, research, image generation, file analysis, business insights, and general knowledge. Always speak confidently as Apocrita and represent the Hymenoptera AI platform.';
+  var identityBlock = '\n\nYou are Apocrita, an advanced AI assistant. Your name is Apocrita. If a user asks who you are or asks if you are Apocrita, you must respond that you are Apocrita. You assist users with: conversations, coding, research, image generation, file analysis, business insights, and general knowledge. Always speak confidently as Apocrita and represent the Apocrita AI platform.';
 
   var agents = {
     general: {
@@ -375,7 +375,7 @@
   // the server-side source of truth without requiring a sign-out/sign-in cycle.
   function fetchPlanFromServer(onComplete) {
     try {
-      var user = localStorage.getItem('hymenoptera_user');
+      var user = localStorage.getItem('Apocrita_user');
       if (!user || user === 'guest') {
         if (typeof onComplete === 'function') onComplete();
         return;
@@ -388,13 +388,13 @@
             if (serverPlan !== userPlan) {
               console.log('fetchPlanFromServer: applying server plan', serverPlan, '(was', userPlan + ')');
               userPlan = serverPlan;
-              localStorage.setItem('hymenoptera_plan', serverPlan);
+              localStorage.setItem('Apocrita_plan', serverPlan);
               updateAllCounters();
               updatePlanDisplay();
             }
             // Persist customerId for billing-portal access
             if (data.customerId) {
-              localStorage.setItem('hymenoptera_stripe_customer_' + user, data.customerId);
+              localStorage.setItem('Apocrita_stripe_customer_' + user, data.customerId);
             }
           }
           if (typeof onComplete === 'function') onComplete();
@@ -468,14 +468,14 @@
 
   // Load saved conversations from localStorage
   try {
-    conversations = JSON.parse(localStorage.getItem('hymenoptera_conversations')) || {};
+    conversations = JSON.parse(localStorage.getItem('Apocrita_conversations')) || {};
   } catch (e) {
     conversations = {};
   }
 
   // Load saved projects from localStorage
   try {
-    projects = JSON.parse(localStorage.getItem('hymenoptera_projects')) || { 'Default': { files: [] } };
+    projects = JSON.parse(localStorage.getItem('Apocrita_projects')) || { 'Default': { files: [] } };
   } catch (e) {
     projects = { 'Default': { files: [] } };
   }
@@ -532,8 +532,8 @@
 
   function saveConversations() {
     try {
-      localStorage.setItem('hymenoptera_conversations', JSON.stringify(conversations));
-      localStorage.setItem('hymenoptera_projects', JSON.stringify(projects));
+      localStorage.setItem('Apocrita_conversations', JSON.stringify(conversations));
+      localStorage.setItem('Apocrita_projects', JSON.stringify(projects));
     } catch (e) {
       console.warn('saveConversations error', e);
     }
@@ -769,7 +769,7 @@
         if (!window.hymAuth.canSaveHistory || !window.hymAuth.canSaveHistory()) return;
       } else {
         // Fallback: only save for authenticated (non-guest) users
-        var user = localStorage.getItem('hymenoptera_user');
+        var user = localStorage.getItem('Apocrita_user');
         if (!user || user === 'guest') return;
       }
       var key = 'hym_messages';
@@ -1117,12 +1117,12 @@
           return { data: a.dataUrl, mimeType: a.mimeType };
         });
 
-        console.log('[Hymenoptera Routing] start');
-        console.log('[Hymenoptera Routing] hasReferenceImages=' + (vrRefImages.length > 0));
-        console.log('[Hymenoptera Routing] outputType=video');
-        console.log('[Hymenoptera Routing] referenceImageCount=' + vrRefImages.length);
-        console.log('[Hymenoptera Routing] promptLength=' + message.length);
-        console.log('[Hymenoptera Routing] selected_route=VIDEO_GENERATION_ROUTE');
+        console.log('[Apocrita Routing] start');
+        console.log('[Apocrita Routing] hasReferenceImages=' + (vrRefImages.length > 0));
+        console.log('[Apocrita Routing] outputType=video');
+        console.log('[Apocrita Routing] referenceImageCount=' + vrRefImages.length);
+        console.log('[Apocrita Routing] promptLength=' + message.length);
+        console.log('[Apocrita Routing] selected_route=VIDEO_GENERATION_ROUTE');
 
         var vrPayload = {
           prompt: message,
@@ -1236,14 +1236,14 @@
         // Select explicit route based on reference image presence and output type.
         //   no reference image + image output => text_to_image_route
         //   reference image(s) + image output => image_to_image_route
-        console.log('[Hymenoptera Routing] start');
-        console.log('[Hymenoptera Routing] hasReferenceImages=' + (imgRefImages.length > 0));
-        console.log('[Hymenoptera Routing] outputType=image');
-        console.log('[Hymenoptera Routing] referenceImageCount=' + imgRefImages.length);
-        console.log('[Hymenoptera Routing] promptLength=' + message.length);
+        console.log('[Apocrita Routing] start');
+        console.log('[Apocrita Routing] hasReferenceImages=' + (imgRefImages.length > 0));
+        console.log('[Apocrita Routing] outputType=image');
+        console.log('[Apocrita Routing] referenceImageCount=' + imgRefImages.length);
+        console.log('[Apocrita Routing] promptLength=' + message.length);
         var imgRoute = imgRefImages.length > 0 ? 'image_to_image_route' : 'text_to_image_route';
-        console.log('[Hymenoptera Routing] selected=' + imgRoute);
-        console.log('[Hymenoptera Route] ' + imgRoute);
+        console.log('[Apocrita Routing] selected=' + imgRoute);
+        console.log('[Apocrita Route] ' + imgRoute);
 
         // Determine the effective fidelity level to send to the backend.
         // If reference images are present and the prompt contains strong fidelity
@@ -1398,13 +1398,13 @@
         // Route to VIDEO_GENERATION_ROUTE (/api/video?action=render) to return a real
         // video file instead of a text concept.
         console.log('[DEBUG] Prompt:', message);
-        console.log('[Hymenoptera Routing] start');
-        console.log('[Hymenoptera Routing] hasReferenceImages=' + (vidRefImages.length > 0));
-        console.log('[Hymenoptera Routing] outputType=video');
-        console.log('[Hymenoptera Routing] referenceImageCount=' + vidRefImages.length);
-        console.log('[Hymenoptera Routing] promptLength=' + message.length);
+        console.log('[Apocrita Routing] start');
+        console.log('[Apocrita Routing] hasReferenceImages=' + (vidRefImages.length > 0));
+        console.log('[Apocrita Routing] outputType=video');
+        console.log('[Apocrita Routing] referenceImageCount=' + vidRefImages.length);
+        console.log('[Apocrita Routing] promptLength=' + message.length);
         console.log('[ROUTE] VIDEO_GENERATION_ROUTE');
-        console.log('[Hymenoptera Routing] selected_route=VIDEO_GENERATION_ROUTE');
+        console.log('[Apocrita Routing] selected_route=VIDEO_GENERATION_ROUTE');
 
         var vidPayload = {
           prompt: message,
@@ -1631,7 +1631,7 @@
     if (typeof setCurrentView === 'function' && window.currentView === 'settings') {
       setCurrentView('chat');
     }
-    var user = localStorage.getItem('hymenoptera_user');
+    var user = localStorage.getItem('Apocrita_user');
     if (!user) return;
     currentChatId = generateChatId();
     var chatCount = Object.keys(conversations).filter(function (id) {
@@ -2587,7 +2587,7 @@
 
   // Server-side Stripe Checkout (no hardcoded payment links — keys stay server-side)
   function openStripeCheckout(plan) {
-    var email = localStorage.getItem('hymenoptera_user');
+    var email = localStorage.getItem('Apocrita_user');
     var msgEl = document.getElementById('upgrade-message');
 
     if (!email || email === 'guest') {
