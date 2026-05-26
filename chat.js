@@ -185,10 +185,10 @@
   }
 
   // Daily message usage tracking
-  var messagesToday = Number(localStorage.getItem('messagesToday')) || 0;
-  var imagesToday   = Number(localStorage.getItem('imagesToday'))   || 0;
-  var videosToday   = Number(localStorage.getItem('videosToday'))   || 0;
-  var lastResetDate = localStorage.getItem('lastResetDate') || getTodayDateString();
+  var messagesToday = Number(localStorage.getItem('apocrita_messages_today')) || 0;
+  var imagesToday   = Number(localStorage.getItem('apocrita_images_today'))   || 0;
+  var videosToday   = Number(localStorage.getItem('apocrita_videos_today'))   || 0;
+  var lastResetDate = localStorage.getItem('apocrita_last_reset_date') || getTodayDateString();
 
   // Daily reset check on page load: if the calendar day has changed, reset the counter
   (function () {
@@ -198,10 +198,10 @@
       imagesToday   = 0;
       videosToday   = 0;
       lastResetDate = today;
-      localStorage.setItem('messagesToday', '0');
-      localStorage.setItem('imagesToday',   '0');
-      localStorage.setItem('videosToday',   '0');
-      localStorage.setItem('lastResetDate', today);
+      localStorage.setItem('apocrita_messages_today', '0');
+      localStorage.setItem('apocrita_images_today',   '0');
+      localStorage.setItem('apocrita_videos_today',   '0');
+      localStorage.setItem('apocrita_last_reset_date', today);
     }
   }());
 
@@ -348,15 +348,15 @@
       }).then(function (data) {
         if (data && typeof data.messages_used === 'number') {
           messagesToday = data.messages_used;
-          localStorage.setItem('messagesToday', messagesToday);
+          localStorage.setItem('apocrita_messages_today', messagesToday);
         }
         if (data && typeof data.images_used === 'number') {
           imagesToday = data.images_used;
-          localStorage.setItem('imagesToday', imagesToday);
+          localStorage.setItem('apocrita_images_today', imagesToday);
         }
         if (data && typeof data.videos_used === 'number') {
           videosToday = data.videos_used;
-          localStorage.setItem('videosToday', videosToday);
+          localStorage.setItem('apocrita_videos_today', videosToday);
         }
         if (data && (typeof data.messages_used === 'number' || typeof data.images_used === 'number' || typeof data.videos_used === 'number')) {
           updateAllCounters();
@@ -1004,10 +1004,10 @@
       imagesToday   = 0;
       videosToday   = 0;
       lastResetDate = today;
-      localStorage.setItem('messagesToday', '0');
-      localStorage.setItem('imagesToday',   '0');
-      localStorage.setItem('videosToday',   '0');
-      localStorage.setItem('lastResetDate', today);
+      localStorage.setItem('apocrita_messages_today', '0');
+      localStorage.setItem('apocrita_images_today',   '0');
+      localStorage.setItem('apocrita_videos_today',   '0');
+      localStorage.setItem('apocrita_last_reset_date', today);
       updateAllCounters();
       // Refresh counter from backend asynchronously (non-blocking)
       fetchUsageFromBackend();
@@ -1098,7 +1098,7 @@
 
       // Increment message count before sending the AI request
       messagesToday++;
-      localStorage.setItem('messagesToday', messagesToday);
+      localStorage.setItem('apocrita_messages_today', messagesToday);
       updateMessageCounter();
 
       // ── VIDEO_GENERATION_ROUTE — keyword-based auto-routing ──────────────────
@@ -1200,7 +1200,7 @@
             vrBubble.appendChild(makeCopyBtn(function () { return vrData.url; }));
             // Increment video counter on successful generation
             videosToday++;
-            localStorage.setItem('videosToday', videosToday);
+            localStorage.setItem('apocrita_videos_today', videosToday);
             updateVideoCounter();
           } else {
             // Unexpected response format — display as text
@@ -1364,7 +1364,7 @@
 
           // Increment image counter on successful generation
           imagesToday++;
-          localStorage.setItem('imagesToday', imagesToday);
+          localStorage.setItem('apocrita_images_today', imagesToday);
           updateImageCounter();
 
           conversations[currentChatId].messages.push(imgHistoryMsg);
@@ -1482,7 +1482,7 @@
             vidBubble.appendChild(makeCopyBtn(function () { return vidData.url; }));
             // Increment video counter on successful generation
             videosToday++;
-            localStorage.setItem('videosToday', videosToday);
+            localStorage.setItem('apocrita_videos_today', videosToday);
             updateVideoCounter();
           } else {
             // Unexpected response format — display as text

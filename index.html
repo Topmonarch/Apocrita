@@ -9,23 +9,25 @@
   <!-- Deployment: 2026-05-26 Clean APOCRITA branding v1.0.1 -->
   <title>APOCRITA</title>
   <script>
-    // One-time migration: copy any stale hymenoptera_* keys into apocrita_* equivalents,
-    // then remove the old keys. Runs synchronously before any other script so auth.js
-    // and chat.js always see the correct keys regardless of when the user last visited.
+    // One-time localStorage migration. Runs synchronously before any other script.
+    // 1. Migrates stale prefixed legacy keys (hymenoptera_*, Apocrita_*) → apocrita_*
+    // 2. Migrates old naked usage-counter keys → apocrita_* prefixed equivalents
+    // 3. Removes all old keys after migration
     (function () {
-      var LEGACY_PREFIXES = ['hymenoptera_', 'Hymenoptera_', 'HYMENOPTERA_', 'Apocrita_'];
-      var TARGET_PREFIX   = 'apocrita_';
       try {
         var toRemove = [];
+
+        // ── Prefixed legacy key migration ────────────────────────────────────
+        var LEGACY_PREFIXES = ['hymenoptera_', 'Hymenoptera_', 'HYMENOPTERA_', 'Apocrita_'];
+        var TARGET_PREFIX   = 'apocrita_';
         for (var i = 0; i < localStorage.length; i++) {
           var key = localStorage.key(i);
           if (!key) continue;
           for (var p = 0; p < LEGACY_PREFIXES.length; p++) {
             var legacy = LEGACY_PREFIXES[p];
             if (key.indexOf(legacy) === 0) {
-              var suffix     = key.slice(legacy.length);
-              var targetKey  = TARGET_PREFIX + suffix;
-              // Only migrate if the target key doesn't already have a value
+              var suffix    = key.slice(legacy.length);
+              var targetKey = TARGET_PREFIX + suffix;
               if (!localStorage.getItem(targetKey)) {
                 var val = localStorage.getItem(key);
                 if (val !== null) localStorage.setItem(targetKey, val);
@@ -35,10 +37,31 @@
             }
           }
         }
+
+        // ── Naked usage-counter key migration ───────────────────────────────
+        // Old unprefixed keys → new apocrita_ prefixed equivalents
+        var NAKED_MAP = {
+          'messagesToday': 'apocrita_messages_today',
+          'imagesToday':   'apocrita_images_today',
+          'videosToday':   'apocrita_videos_today',
+          'lastResetDate': 'apocrita_last_reset_date'
+        };
+        var nakedKeys = Object.keys(NAKED_MAP);
+        for (var n = 0; n < nakedKeys.length; n++) {
+          var oldKey = nakedKeys[n];
+          var newKey = NAKED_MAP[oldKey];
+          var oldVal = localStorage.getItem(oldKey);
+          if (oldVal !== null) {
+            if (!localStorage.getItem(newKey)) localStorage.setItem(newKey, oldVal);
+            toRemove.push(oldKey);
+          }
+        }
+
+        // ── Remove all stale keys ────────────────────────────────────────────
         for (var j = 0; j < toRemove.length; j++) {
           localStorage.removeItem(toRemove[j]);
         }
-      } catch (e) { /* localStorage may be unavailable in some contexts */ }
+      } catch (e) { /* localStorage unavailable — ignore */ }
     })();
   </script>
   <link rel="stylesheet" href="settings/settings.css?v=1.0.1" />
