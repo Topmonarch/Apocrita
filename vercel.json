@@ -50,6 +50,14 @@
       "dest": "/api/video.js"
     },
     {
+      "src": "/(favicon\\.svg)",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(apocrita_logo\\.svg)",
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*\\.(js|css|png|ico|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },
@@ -68,7 +76,14 @@
       ]
     },
     {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|webp|woff|woff2))",
+      "source": "/(apocrita_logo\\.svg|favicon\\.svg)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" },
+        { "key": "Content-Type",  "value": "image/svg+xml" }
+      ]
+    },
+    {
+      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|webp|woff|woff2))",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]

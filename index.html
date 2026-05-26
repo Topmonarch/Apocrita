@@ -6,8 +6,27 @@
   <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="pragma" content="no-cache" />
   <meta http-equiv="expires" content="0" />
-  <!-- Deployment: 2026-05-26 Clean APOCRITA branding v1.0.1 -->
-  <title>APOCRITA</title>
+  <!-- Deployment: 2026-05-26 Clean APOCRITA branding v1.0.2 -->
+  <title>APOCRITA — AI Workstation</title>
+  <meta name="description" content="APOCRITA — A retro-futuristic AI workstation. Chat, generate images and video, analyse files, and more." />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta name="application-name" content="APOCRITA" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="APOCRITA — AI Workstation" />
+  <meta property="og:description" content="A retro-futuristic AI workstation. Chat, generate images and video, analyse files, and more." />
+  <meta property="og:site_name"   content="APOCRITA" />
+  <meta property="og:image"       content="/apocrita_logo.svg" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="APOCRITA — AI Workstation" />
+  <meta name="twitter:description" content="A retro-futuristic AI workstation built on Windows XP aesthetics." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.svg" />
   <script>
     // One-time localStorage migration. Runs synchronously before any other script.
     // 1. Migrates stale prefixed legacy keys (hymenoptera_*, Apocrita_*) → apocrita_*
@@ -64,7 +83,7 @@
       } catch (e) { /* localStorage unavailable — ignore */ }
     })();
   </script>
-  <link rel="stylesheet" href="settings/settings.css?v=1.0.1" />
+  <link rel="stylesheet" href="settings/settings.css?v=1.0.2" />
   <style>
     :root {
       --accent-color: #2D8CFF;
@@ -105,20 +124,24 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      padding: 2px 0 6px;
+      border-bottom: 1px solid #1e2530;
+      margin-bottom: 4px;
     }
 
     .sidebar-brand img {
-      height: 36px;
-      width: 36px;
+      height: 32px;
+      width: 32px;
       object-fit: contain;
-      border-radius: 8px;
+      flex-shrink: 0;
     }
 
     .sidebar-title {
       font-weight: 800;
       color: var(--accent-color);
-      letter-spacing: 2px;
-      font-size: 14px;
+      letter-spacing: 3px;
+      font-size: 13px;
+      text-shadow: 0 0 8px rgba(45,140,255,0.4);
     }
 
     .new-chat-btn {
@@ -540,23 +563,47 @@
     }
 
     .login-box {
-      background: #111;
-      padding: 36px;
+      background: #0e131a;
+      padding: 36px 36px 32px;
       border-radius: 12px;
-      width: 340px;
+      width: 360px;
       border: 1px solid #1e2530;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(45,140,255,0.08);
+    }
+
+    .login-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .login-brand img {
+      height: 56px;
+      width: 56px;
+      object-fit: contain;
     }
 
     .login-box h2 {
-      margin: 0 0 20px;
+      margin: 0;
       color: var(--accent-color);
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
-      letter-spacing: 2px;
+      letter-spacing: 5px;
+      text-align: center;
       text-shadow:
-        0 0 6px rgba(255,255,255,0.05),
-        0 0 10px var(--accent-glow),
-        0 0 20px rgba(45,140,255,0.25);
+        0 0 8px rgba(45,140,255,0.5),
+        0 0 20px rgba(45,140,255,0.2);
+    }
+
+    .login-tagline {
+      font-size: 11px;
+      color: #4a5568;
+      letter-spacing: 1.5px;
+      text-align: center;
+      text-transform: uppercase;
+      margin-top: 4px;
     }
 
     .form-tabs {
@@ -706,17 +753,27 @@
     }
 
     .empty-state-logo {
-      height: 80px;
-      opacity: 0.35;
+      height: 72px;
+      width: 72px;
+      opacity: 0.28;
     }
 
     .empty-state-title {
-      margin-top: 14px;
+      margin-top: 16px;
       font-weight: 800;
-      letter-spacing: 4px;
-      font-size: 15px;
+      letter-spacing: 6px;
+      font-size: 13px;
       color: var(--accent-color);
-      opacity: 0.45;
+      opacity: 0.4;
+      text-transform: uppercase;
+    }
+
+    .empty-state-sub {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #333;
+      letter-spacing: 1px;
+      opacity: 0.7;
     }
 
     #messages {
@@ -1958,13 +2015,12 @@
     }
   </style>
   <script>
-    // Cache busting: force fresh assets by adding version parameter
-    const CACHE_BUSTER = '?v=1.0.1';
+    // Cache busting: force fresh assets on version bump
+    const CACHE_BUSTER = '?v=1.0.2';
     window.addEventListener('DOMContentLoaded', function() {
-      // Update all img src attributes
       document.querySelectorAll('img').forEach(function(img) {
         if (img.src && !img.src.includes('v=')) {
-          if (img.src.includes('apocrita_logo_transparent.png') || img.src.includes('public/icons/')) {
+          if (img.src.includes('apocrita_logo') || img.src.includes('public/icons/')) {
             img.src = img.src + CACHE_BUSTER;
           }
         }
@@ -1985,7 +2041,7 @@
     <!-- Mobile/tablet close button -->
     <button class="sidebar-close-btn" id="sidebar-close-btn" onclick="closeSidebar()" title="Close menu">&#10005;</button>
     <div class="sidebar-brand">
-      <img src="apocrita_logo_transparent.png" alt="Apocrita" />
+      <img src="apocrita_logo.svg" alt="APOCRITA" />
       <div class="sidebar-title">APOCRITA</div>
     </div>
 
@@ -2026,7 +2082,11 @@
     <!-- Login Screen -->
     <div id="login-screen">
       <div class="login-box">
-        <h2>APOCRITA</h2>
+        <div class="login-brand">
+          <img src="apocrita_logo.svg" alt="APOCRITA" />
+          <h2>APOCRITA</h2>
+          <div class="login-tagline">AI Workstation</div>
+        </div>
 
         <div class="form-tabs">
           <button class="tab-btn active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
@@ -2109,8 +2169,9 @@
 
       <!-- Empty state: shown when no messages, hidden on first send, restored on New Chat -->
       <div id="empty-state" class="empty-state">
-        <img src="apocrita_logo_transparent.png" alt="Apocrita" class="empty-state-logo" />
+        <img src="apocrita_logo.svg" alt="APOCRITA" class="empty-state-logo" />
         <div class="empty-state-title">APOCRITA</div>
+        <div class="empty-state-sub">AI Workstation</div>
       </div>
 
       <div id="messages"></div>
@@ -2511,9 +2572,9 @@
     </div>
   </div>
 
-  <script src="auth.js?v=1.0.1"></script>
-  <script src="chat.js?v=1.0.1"></script>
-  <script src="settings/settings.js?v=1.0.1"></script>
+  <script src="auth.js?v=1.0.2"></script>
+  <script src="chat.js?v=1.0.2"></script>
+  <script src="settings/settings.js?v=1.0.2"></script>
 
   <script>
     function switchTab(tab) {
