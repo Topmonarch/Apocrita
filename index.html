@@ -8,6 +8,39 @@
   <meta http-equiv="expires" content="0" />
   <!-- Deployment: 2026-05-26 Clean APOCRITA branding v1.0.1 -->
   <title>APOCRITA</title>
+  <script>
+    // One-time migration: copy any stale hymenoptera_* keys into apocrita_* equivalents,
+    // then remove the old keys. Runs synchronously before any other script so auth.js
+    // and chat.js always see the correct keys regardless of when the user last visited.
+    (function () {
+      var LEGACY_PREFIXES = ['hymenoptera_', 'Hymenoptera_', 'HYMENOPTERA_', 'Apocrita_'];
+      var TARGET_PREFIX   = 'apocrita_';
+      try {
+        var toRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (!key) continue;
+          for (var p = 0; p < LEGACY_PREFIXES.length; p++) {
+            var legacy = LEGACY_PREFIXES[p];
+            if (key.indexOf(legacy) === 0) {
+              var suffix     = key.slice(legacy.length);
+              var targetKey  = TARGET_PREFIX + suffix;
+              // Only migrate if the target key doesn't already have a value
+              if (!localStorage.getItem(targetKey)) {
+                var val = localStorage.getItem(key);
+                if (val !== null) localStorage.setItem(targetKey, val);
+              }
+              toRemove.push(key);
+              break;
+            }
+          }
+        }
+        for (var j = 0; j < toRemove.length; j++) {
+          localStorage.removeItem(toRemove[j]);
+        }
+      } catch (e) { /* localStorage may be unavailable in some contexts */ }
+    })();
+  </script>
   <link rel="stylesheet" href="settings/settings.css?v=1.0.1" />
   <style>
     :root {
