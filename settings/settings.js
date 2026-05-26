@@ -333,7 +333,7 @@ function openBillingPortal() {
   showSettingsMessage('billing-message', 'Connecting to billing portal...', 'success');
 
   // Send email to server — it validates the customer ID from Supabase, not client
-  fetch('/api/billing-portal', {
+  fetch('/api/billing?action=portal', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ email: user })
@@ -381,7 +381,7 @@ function _generateVerificationToken() {
 }
 
 function _sendVerificationEmailRequest(email, token) {
-  return fetch('/api/send-verification', {
+  return fetch('/api/verify?action=send', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ email: email, token: token })
@@ -558,7 +558,7 @@ function checkVerificationToken() {
   if (verifEl) verifEl.style.display = 'flex';
   _setVerifMsg('Verifying your email\u2026', 'verif-pending');
 
-  fetch('/api/verify-email', {
+  fetch('/api/verify?action=confirm', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ token: token })

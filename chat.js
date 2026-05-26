@@ -2604,7 +2604,7 @@
       if (btn) btn.disabled = true;
     });
 
-    fetch('/api/create-checkout', {
+    fetch('/api/billing?action=checkout', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email: email, plan: plan })

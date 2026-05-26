@@ -5,6 +5,10 @@ api/usage.js
 api/gemini.js
 api/video-route.js
 api/generate-video.js
+api/billing-portal.js
+api/create-checkout.js
+api/send-verification.js
+api/verify-email.js
 
 # Development and environment files
 .env

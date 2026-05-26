@@ -5,17 +5,15 @@
   "outputDirectory": ".",
   "installCommand": "npm install",
   "builds": [
-    { "src": "api/account.js",           "use": "@vercel/node" },
-    { "src": "api/billing-portal.js",    "use": "@vercel/node" },
-    { "src": "api/chat.js",              "use": "@vercel/node" },
-    { "src": "api/create-checkout.js",   "use": "@vercel/node" },
-    { "src": "api/generate-image.js",    "use": "@vercel/node" },
-    { "src": "api/send-verification.js", "use": "@vercel/node" },
-    { "src": "api/stripe-webhook.js",    "use": "@vercel/node" },
-    { "src": "api/upload-file.js",       "use": "@vercel/node" },
-    { "src": "api/verify-email.js",      "use": "@vercel/node" },
-    { "src": "api/video.js",             "use": "@vercel/node" },
-    { "src": "index.html",               "use": "@vercel/static" }
+    { "src": "api/account.js",        "use": "@vercel/node" },
+    { "src": "api/billing.js",        "use": "@vercel/node" },
+    { "src": "api/chat.js",           "use": "@vercel/node" },
+    { "src": "api/generate-image.js", "use": "@vercel/node" },
+    { "src": "api/stripe-webhook.js", "use": "@vercel/node" },
+    { "src": "api/upload-file.js",    "use": "@vercel/node" },
+    { "src": "api/verify.js",         "use": "@vercel/node" },
+    { "src": "api/video.js",          "use": "@vercel/node" },
+    { "src": "index.html",            "use": "@vercel/static" }
   ],
   "routes": [
     {
@@ -28,32 +26,24 @@
       "dest": "/api/account.js"
     },
     {
-      "src": "/api/billing-portal",
-      "dest": "/api/billing-portal.js"
+      "src": "/api/billing",
+      "dest": "/api/billing.js"
     },
     {
       "src": "/api/chat",
       "dest": "/api/chat.js"
     },
     {
-      "src": "/api/create-checkout",
-      "dest": "/api/create-checkout.js"
-    },
-    {
       "src": "/api/generate-image",
       "dest": "/api/generate-image.js"
-    },
-    {
-      "src": "/api/send-verification",
-      "dest": "/api/send-verification.js"
     },
     {
       "src": "/api/upload-file",
       "dest": "/api/upload-file.js"
     },
     {
-      "src": "/api/verify-email",
-      "dest": "/api/verify-email.js"
+      "src": "/api/verify",
+      "dest": "/api/verify.js"
     },
     {
       "src": "/api/video",
