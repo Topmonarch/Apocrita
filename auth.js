@@ -83,25 +83,25 @@ function _validatePassword(password) {
 
 // Persist minimal auth state to localStorage (email + token)
 function _saveSession(email, accessToken, userId) {
-  localStorage.setItem('Apocrita_user',  email || '');
-  localStorage.setItem('Apocrita_token', accessToken || '');
-  localStorage.setItem('Apocrita_uid',   userId || '');
+  localStorage.setItem('apocrita_user',  email || '');
+  localStorage.setItem('apocrita_token', accessToken || '');
+  localStorage.setItem('apocrita_uid',   userId || '');
 }
 
 function _clearSession() {
-  localStorage.removeItem('Apocrita_user');
-  localStorage.removeItem('Apocrita_token');
-  localStorage.removeItem('Apocrita_uid');
+  localStorage.removeItem('apocrita_user');
+  localStorage.removeItem('apocrita_token');
+  localStorage.removeItem('apocrita_uid');
   // Also clear any legacy verification state
-  localStorage.removeItem('Apocrita_needs_verification');
-  localStorage.removeItem('Apocrita_pending_email');
-  localStorage.removeItem('Apocrita_pending_token');
+  localStorage.removeItem('apocrita_needs_verification');
+  localStorage.removeItem('apocrita_pending_email');
+  localStorage.removeItem('apocrita_pending_token');
 }
 
 // ===== Public auth functions =====
 
 function continueAsGuest() {
-  localStorage.setItem('Apocrita_user', 'guest');
+  localStorage.setItem('apocrita_user', 'guest');
   _showScreen('chat-screen');
   updateAccountDisplay();
 }
@@ -151,7 +151,7 @@ async function signIn() {
 
     if (profile && profile.email_verified === false) {
       // Account exists but not verified — route to verification screen
-      localStorage.setItem('Apocrita_pending_email', email);
+      localStorage.setItem('apocrita_pending_email', email);
       _showScreen('verification-screen');
       var disp = document.getElementById('verification-email-display');
       if (disp) disp.textContent = email;
@@ -171,7 +171,7 @@ async function signIn() {
 }
 
 function updateAccountDisplay() {
-  var user       = localStorage.getItem('Apocrita_user');
+  var user       = localStorage.getItem('apocrita_user');
   var label      = document.getElementById('account-label');
   var signoutBtn = document.getElementById('signoutBtn');
 
@@ -186,7 +186,7 @@ function updateAccountDisplay() {
 }
 
 async function signOut() {
-  var token = localStorage.getItem('Apocrita_token');
+  var token = localStorage.getItem('apocrita_token');
   if (token) {
     try { await _sb.signOut(token); } catch (e) { /* ignore */ }
   }
@@ -197,7 +197,7 @@ async function signOut() {
 }
 
 window.onload = function () {
-  var user = localStorage.getItem('Apocrita_user');
+  var user = localStorage.getItem('apocrita_user');
   if (user && user !== 'guest') {
     // Restore authenticated session
     _showScreen('chat-screen');
