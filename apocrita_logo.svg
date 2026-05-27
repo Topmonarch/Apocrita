@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Outer hexagon glow -->
+  <polygon points="60,6 108,33 108,87 60,114 12,87 12,33"
+    fill="rgba(45,140,255,0.07)" stroke="rgba(45,140,255,0.35)" stroke-width="1.5"/>
+  <!-- Inner hexagon -->
+  <polygon points="60,18 96,39 96,81 60,102 24,81 24,39"
+    fill="rgba(45,140,255,0.05)" stroke="rgba(45,140,255,0.6)" stroke-width="1"/>
+  <!-- "A" letterform -->
+  <path d="M40 86 L60 34 L80 86 M46 70 L74 70"
+    stroke="#2D8CFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Accent dot -->
+  <circle cx="60" cy="30" r="3" fill="#2D8CFF" opacity="0.8"/>
+</svg>

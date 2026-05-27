@@ -23,6 +23,13 @@
       ]
     },
     {
+      "source": "/apocrita_logo_transparent\\.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" },
+        { "key": "Content-Type",  "value": "image/png" }
+      ]
+    },
+    {
       "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|webp|woff|woff2))",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
