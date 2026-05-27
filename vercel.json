@@ -1,70 +1,10 @@
 {
   "version": 2,
-  "framework": null,
   "buildCommand": "npm install",
   "outputDirectory": ".",
   "installCommand": "npm install",
-  "builds": [
-    { "src": "api/account.js",        "use": "@vercel/node" },
-    { "src": "api/billing.js",        "use": "@vercel/node" },
-    { "src": "api/chat.js",           "use": "@vercel/node" },
-    { "src": "api/generate-image.js", "use": "@vercel/node" },
-    { "src": "api/stripe-webhook.js", "use": "@vercel/node" },
-    { "src": "api/upload-file.js",    "use": "@vercel/node" },
-    { "src": "api/verify.js",         "use": "@vercel/node" },
-    { "src": "api/video.js",          "use": "@vercel/node" },
-    { "src": "index.html",            "use": "@vercel/static" }
-  ],
-  "routes": [
-    {
-      "src": "/api/stripe-webhook",
-      "dest": "/api/stripe-webhook.js",
-      "methods": ["POST"]
-    },
-    {
-      "src": "/api/account",
-      "dest": "/api/account.js"
-    },
-    {
-      "src": "/api/billing",
-      "dest": "/api/billing.js"
-    },
-    {
-      "src": "/api/chat",
-      "dest": "/api/chat.js"
-    },
-    {
-      "src": "/api/generate-image",
-      "dest": "/api/generate-image.js"
-    },
-    {
-      "src": "/api/upload-file",
-      "dest": "/api/upload-file.js"
-    },
-    {
-      "src": "/api/verify",
-      "dest": "/api/verify.js"
-    },
-    {
-      "src": "/api/video",
-      "dest": "/api/video.js"
-    },
-    {
-      "src": "/(favicon\\.svg)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(apocrita_logo\\.svg)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*\\.(js|css|png|ico|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot))",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
