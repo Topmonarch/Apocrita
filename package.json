@@ -1,0 +1,19 @@
+{
+  "name": "apocrita",
+  "version": "1.0.1",
+  "description": "Apocrita - Windows XP themed chat interface",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "echo 'Static site - no build step required'",
+    "start": "npx http-server -p 3000 --cors"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16",
+    "stripe": "^17.7.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
